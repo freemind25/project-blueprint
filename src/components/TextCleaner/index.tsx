@@ -14,10 +14,14 @@ export const TextCleaner: React.FC = () => {
     setText,
     fileName,
     isProcessing,
+    isHumanizing,
     isCleaned,
+    isHumanized,
     stats,
+    humanizeStats,
     loadFile,
     performClean,
+    performHumanize,
     clearAll,
     downloadFile,
     copyToClipboard,
@@ -54,6 +58,15 @@ export const TextCleaner: React.FC = () => {
       }
     }, 350);
   }, [performClean, stats]);
+
+  const handleHumanize = useCallback(() => {
+    performHumanize();
+    setTimeout(() => {
+      toast.success("Texte humanisé", {
+        description: `${humanizeStats?.modificationsCount || 0} modifications appliquées`,
+      });
+    }, 550);
+  }, [performHumanize, humanizeStats]);
 
   const handleCopy = useCallback(async () => {
     const success = await copyToClipboard();
@@ -106,13 +119,16 @@ export const TextCleaner: React.FC = () => {
           <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
             <ActionBar
               onClean={handleClean}
+              onHumanize={handleHumanize}
               onDownload={downloadFile}
               onClear={handleClear}
               onCopy={handleCopy}
               hasText={text.length > 0}
               isCleaned={isCleaned}
+              isHumanized={isHumanized}
               isCopied={isCopied}
               isProcessing={isProcessing}
+              isHumanizing={isHumanizing}
             />
           </div>
 

@@ -1,28 +1,34 @@
 import React from "react";
-import { Sparkles, Download, Trash2, Copy, Check } from "lucide-react";
+import { Sparkles, Download, Trash2, Copy, Check, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface ActionBarProps {
   onClean: () => void;
+  onHumanize: () => void;
   onDownload: () => void;
   onClear: () => void;
   onCopy: () => void;
   hasText: boolean;
   isCleaned: boolean;
+  isHumanized: boolean;
   isCopied: boolean;
   isProcessing: boolean;
+  isHumanizing: boolean;
 }
 
 export const ActionBar: React.FC<ActionBarProps> = ({
   onClean,
+  onHumanize,
   onDownload,
   onClear,
   onCopy,
   hasText,
   isCleaned,
+  isHumanized,
   isCopied,
   isProcessing,
+  isHumanizing,
 }) => {
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -30,7 +36,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
         variant="hero"
         size="lg"
         onClick={onClean}
-        disabled={!hasText || isProcessing}
+        disabled={!hasText || isProcessing || isHumanizing}
         className="relative overflow-hidden"
       >
         {isProcessing ? (
@@ -42,6 +48,29 @@ export const ActionBar: React.FC<ActionBarProps> = ({
           <>
             <Sparkles className="w-5 h-5" />
             Nettoyer le texte
+          </>
+        )}
+      </Button>
+
+      <Button
+        variant="default"
+        size="lg"
+        onClick={onHumanize}
+        disabled={!hasText || isProcessing || isHumanizing}
+        className={cn(
+          "relative overflow-hidden bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white border-0",
+          isHumanized && "ring-2 ring-violet-400 ring-offset-2 ring-offset-background"
+        )}
+      >
+        {isHumanizing ? (
+          <>
+            <div className="absolute inset-0 animate-shimmer" />
+            <span className="relative">Humanisation...</span>
+          </>
+        ) : (
+          <>
+            <UserRound className="w-5 h-5" />
+            Humaniser
           </>
         )}
       </Button>
