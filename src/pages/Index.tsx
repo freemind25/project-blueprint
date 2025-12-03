@@ -1,13 +1,18 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { TextCleaner } from "@/components/TextCleaner";
+import { Helmet } from "react-helmet-async";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <>
+      <Helmet>
+        <title>Nettoyeur de Texte - Supprimez les caractères invisibles</title>
+        <meta
+          name="description"
+          content="Application de nettoyage de texte pour supprimer les caractères invisibles comme les espaces insécables (U+00A0) et espaces minces (U+202F). Traitement 100% local."
+        />
+      </Helmet>
+      <TextCleaner />
+    </>
   );
 };
 
