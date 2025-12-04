@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Download, Trash2, Copy, Check, UserRound } from "lucide-react";
+import { Sparkles, Download, Trash2, Copy, Check, UserRound, ScanSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -9,12 +9,14 @@ interface ActionBarProps {
   onDownload: () => void;
   onClear: () => void;
   onCopy: () => void;
+  onAnalyze: () => void;
   hasText: boolean;
   isCleaned: boolean;
   isHumanized: boolean;
   isCopied: boolean;
   isProcessing: boolean;
   isHumanizing: boolean;
+  isAnalyzing: boolean;
 }
 
 export const ActionBar: React.FC<ActionBarProps> = ({
@@ -23,12 +25,14 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   onDownload,
   onClear,
   onCopy,
+  onAnalyze,
   hasText,
   isCleaned,
   isHumanized,
   isCopied,
   isProcessing,
   isHumanizing,
+  isAnalyzing,
 }) => {
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -71,6 +75,26 @@ export const ActionBar: React.FC<ActionBarProps> = ({
           <>
             <UserRound className="w-5 h-5" />
             Humaniser
+          </>
+        )}
+      </Button>
+
+      <Button
+        variant="outline"
+        size="lg"
+        onClick={onAnalyze}
+        disabled={!hasText || isProcessing || isHumanizing || isAnalyzing}
+        className="border-blue-500/50 text-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
+      >
+        {isAnalyzing ? (
+          <>
+            <ScanSearch className="w-5 h-5 animate-pulse" />
+            Analyse...
+          </>
+        ) : (
+          <>
+            <ScanSearch className="w-5 h-5" />
+            Analyser IA
           </>
         )}
       </Button>

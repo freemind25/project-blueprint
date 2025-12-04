@@ -6,7 +6,9 @@ import { TextEditor } from "./TextEditor";
 import { ActionBar } from "./ActionBar";
 import { CleaningStats } from "./CleaningStats";
 import { IntensitySlider } from "./IntensitySlider";
+import { AIAnalysis } from "./AIAnalysis";
 import { useTextCleaner } from "@/hooks/useTextCleaner";
+import { useAIDetector, AIAnalysisResult } from "@/hooks/useAIDetector";
 import { FileText, AlertTriangle } from "lucide-react";
 
 export const TextCleaner: React.FC = () => {
@@ -30,7 +32,10 @@ export const TextCleaner: React.FC = () => {
     copyToClipboard,
   } = useTextCleaner();
 
+  const { analyzeText } = useAIDetector();
   const [isCopied, setIsCopied] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AIAnalysisResult | null>(null);
 
   const handleFileLoad = useCallback(
     (content: string, name: string) => {
@@ -84,8 +89,34 @@ export const TextCleaner: React.FC = () => {
 
   const handleClear = useCallback(() => {
     clearAll();
+    setAnalysisResult(null);
     toast.info("Zone de texte effacée");
   }, [clearAll]);
+
+  const handleAnalyze = useCallback(() => {
+    if (!text) return;
+    setIsAnalyzing(true);
+    
+    setTimeout(() => {
+      const result = analyzeText(text);
+      setAnalysisResult(result);
+      setIsAnalyzing(false);
+      
+      if (result.score < 30) {
+        toast.success("Texte probablement humain", {
+          description: `Score de détection: ${result.score}%`,
+        });
+      } else if (result.score < 60) {
+        toast.warning("Texte mixte / incertain", {
+          description: `Score de détection: ${result.score}%`,
+        });
+      } else {
+        toast.error("Texte probablement généré par IA", {
+          description: `Score de détection: ${result.score}%`,
+        });
+      }
+    }, 400);
+  }, [text, analyzeText]);
 
   return (
     <div className="min-h-screen gradient-subtle">
@@ -134,14 +165,23 @@ export const TextCleaner: React.FC = () => {
               onDownload={downloadFile}
               onClear={handleClear}
               onCopy={handleCopy}
+              onAnalyze={handleAnalyze}
               hasText={text.length > 0}
               isCleaned={isCleaned}
               isHumanized={isHumanized}
               isCopied={isCopied}
               isProcessing={isProcessing}
               isHumanizing={isHumanizing}
+              isAnalyzing={isAnalyzing}
             />
           </div>
+
+          {/* AI Analysis results */}
+          {(analysisResult || isAnalyzing) && (
+            <div className="animate-fade-in" style={{ animationDelay: "0.35s" }}>
+              <AIAnalysis result={analysisResult} isAnalyzing={isAnalyzing} />
+            </div>
+          )}
 
           {/* Cleaning statistics */}
           {stats && (
