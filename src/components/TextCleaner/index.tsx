@@ -5,6 +5,7 @@ import { FileDropZone } from "./FileDropZone";
 import { TextEditor } from "./TextEditor";
 import { ActionBar } from "./ActionBar";
 import { CleaningStats } from "./CleaningStats";
+import { IntensitySlider } from "./IntensitySlider";
 import { useTextCleaner } from "@/hooks/useTextCleaner";
 import { FileText, AlertTriangle } from "lucide-react";
 
@@ -19,6 +20,8 @@ export const TextCleaner: React.FC = () => {
     isHumanized,
     stats,
     humanizeStats,
+    humanizeIntensity,
+    setHumanizeIntensity,
     loadFile,
     performClean,
     performHumanize,
@@ -112,6 +115,14 @@ export const TextCleaner: React.FC = () => {
                 setText(value);
               }}
               placeholder="Collez votre texte ici ou chargez un fichier .txt..."
+            />
+          </div>
+
+          {/* Intensity slider */}
+          <div className="animate-fade-in" style={{ animationDelay: "0.25s" }}>
+            <IntensitySlider
+              value={humanizeIntensity}
+              onChange={setHumanizeIntensity}
             />
           </div>
 

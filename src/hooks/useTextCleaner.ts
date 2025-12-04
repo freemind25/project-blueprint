@@ -12,6 +12,8 @@ interface HumanizeResult {
   modificationsCount: number;
 }
 
+export type HumanizeIntensity = "light" | "moderate" | "aggressive";
+
 export const useTextCleaner = () => {
   const [text, setText] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
@@ -21,6 +23,7 @@ export const useTextCleaner = () => {
   const [isHumanized, setIsHumanized] = useState(false);
   const [stats, setStats] = useState<CleaningResult | null>(null);
   const [humanizeStats, setHumanizeStats] = useState<HumanizeResult | null>(null);
+  const [humanizeIntensity, setHumanizeIntensity] = useState<HumanizeIntensity>("moderate");
 
   const loadFile = useCallback((content: string, name: string) => {
     setText(content);
@@ -70,9 +73,17 @@ export const useTextCleaner = () => {
   }, [text, cleanText]);
 
   // Humanize text to avoid AI detection
-  const humanizeText = useCallback((inputText: string): HumanizeResult => {
+  const humanizeText = useCallback((inputText: string, intensity: HumanizeIntensity): HumanizeResult => {
     let result = inputText;
     let modifications = 0;
+
+    // Probability thresholds based on intensity
+    const thresholds = {
+      light: { base: 0.75, medium: 0.85, high: 0.92, rare: 0.96 },
+      moderate: { base: 0.5, medium: 0.6, high: 0.85, rare: 0.9 },
+      aggressive: { base: 0.25, medium: 0.35, high: 0.6, rare: 0.75 },
+    };
+    const t = thresholds[intensity];
 
     // 1. Expressions de transition à varier (plus complètes)
     const transitionReplacements: [RegExp, string[]][] = [
@@ -98,7 +109,7 @@ export const useTextCleaner = () => {
     // Appliquer les remplacements de transitions
     transitionReplacements.forEach(([pattern, replacements]) => {
       result = result.replace(pattern, (match) => {
-        if (Math.random() > 0.5) {
+        if (Math.random() > t.base) {
           modifications++;
           return replacements[Math.floor(Math.random() * replacements.length)];
         }
@@ -110,7 +121,7 @@ export const useTextCleaner = () => {
     const sentences = result.split(/(?<=[.!?])\s+/);
     const modifiedSentences = sentences.map((sentence) => {
       // Couper les phrases très longues (>150 caractères)
-      if (sentence.length > 150 && Math.random() > 0.6) {
+      if (sentence.length > 150 && Math.random() > t.medium) {
         const splitPoints = [", qui ", ", ce qui ", ", car ", ", et ", ", mais "];
         for (const point of splitPoints) {
           if (sentence.includes(point)) {
@@ -133,8 +144,9 @@ export const useTextCleaner = () => {
       let count = 0;
       result = result.replace(pattern, (match, letter) => {
         count++;
-        // N'insérer que très occasionnellement (1 sur 8-10 phrases)
-        if (count % Math.floor(Math.random() * 4 + 6) === 0 && Math.random() > 0.6) {
+        // N'insérer que très occasionnellement
+        const freq = intensity === "aggressive" ? 4 : intensity === "moderate" ? 6 : 10;
+        if (count % Math.floor(Math.random() * 4 + freq) === 0 && Math.random() > t.medium) {
           modifications++;
           const replacement = replacements[Math.floor(Math.random() * replacements.length)];
           return replacement.replace("$1", letter);
@@ -163,7 +175,7 @@ export const useTextCleaner = () => {
 
     informalReplacements.forEach(([pattern, replacements]) => {
       result = result.replace(pattern, (match) => {
-        if (Math.random() > 0.6) {
+        if (Math.random() > t.medium) {
           modifications++;
           const replacement = replacements[Math.floor(Math.random() * replacements.length)];
           return match[0] === match[0].toUpperCase()
@@ -177,7 +189,7 @@ export const useTextCleaner = () => {
     // 5. Varier la ponctuation
     // Remplacer parfois les virgules par des tirets
     result = result.replace(/,/g, (match) => {
-      if (Math.random() > 0.93) {
+      if (Math.random() > t.rare) {
         modifications++;
         return " –";
       }
@@ -186,7 +198,7 @@ export const useTextCleaner = () => {
 
     // Ajouter des points de suspension pour simuler la réflexion
     result = result.replace(/\.\s+([A-Z])/g, (match, letter) => {
-      if (Math.random() > 0.94) {
+      if (Math.random() > t.rare) {
         modifications++;
         return `... ${letter}`;
       }
@@ -202,9 +214,9 @@ export const useTextCleaner = () => {
     ];
 
     contractions.forEach(([pattern, replacement]) => {
-      if (Math.random() > 0.85) {
+      if (Math.random() > t.high) {
         result = result.replace(pattern, (match) => {
-          if (Math.random() > 0.8) {
+          if (Math.random() > t.high) {
             modifications++;
             return replacement;
           }
@@ -222,7 +234,7 @@ export const useTextCleaner = () => {
     ];
 
     const paragraphs = result.split(/\n\n/);
-    if (paragraphs.length > 2 && Math.random() > 0.7) {
+    if (paragraphs.length > 2 && Math.random() > t.medium) {
       const insertIndex = Math.floor(Math.random() * (paragraphs.length - 1)) + 1;
       const lastSentence = paragraphs[insertIndex - 1];
       if (lastSentence && lastSentence.endsWith(".")) {
@@ -236,7 +248,7 @@ export const useTextCleaner = () => {
     // 8. Introduire de légères imperfections (fautes de frappe corrigées visuellement)
     // Ajouter des répétitions naturelles
     result = result.replace(/\b(très|vraiment|assez)\b/gi, (match) => {
-      if (Math.random() > 0.9) {
+      if (Math.random() > t.high) {
         modifications++;
         return match + ", " + match;
       }
@@ -245,7 +257,7 @@ export const useTextCleaner = () => {
 
     // 9. Varier les structures de liste
     result = result.replace(/^(\s*[-•])/gm, (match) => {
-      if (Math.random() > 0.7) {
+      if (Math.random() > t.medium) {
         modifications++;
         const alternatives = ["→", "—", "·", "∙"];
         return alternatives[Math.floor(Math.random() * alternatives.length)];
@@ -261,9 +273,9 @@ export const useTextCleaner = () => {
     ];
 
     parentheticalInserts.forEach(([pattern, replacement]) => {
-      if (Math.random() > 0.9) {
+      if (Math.random() > t.high) {
         result = result.replace(pattern as RegExp, () => {
-          if (Math.random() > 0.85) {
+          if (Math.random() > t.high) {
             modifications++;
             return replacement as string;
           }
@@ -276,7 +288,7 @@ export const useTextCleaner = () => {
       humanizedText: result,
       modificationsCount: modifications,
     };
-  }, []);
+  }, [humanizeIntensity]);
 
   const performHumanize = useCallback(() => {
     if (!text) return;
@@ -284,13 +296,13 @@ export const useTextCleaner = () => {
     setIsHumanizing(true);
 
     setTimeout(() => {
-      const result = humanizeText(text);
+      const result = humanizeText(text, humanizeIntensity);
       setText(result.humanizedText);
       setHumanizeStats(result);
       setIsHumanized(true);
       setIsHumanizing(false);
     }, 500);
-  }, [text, humanizeText]);
+  }, [text, humanizeText, humanizeIntensity]);
 
   const clearAll = useCallback(() => {
     setText("");
@@ -341,6 +353,8 @@ export const useTextCleaner = () => {
     isHumanized,
     stats,
     humanizeStats,
+    humanizeIntensity,
+    setHumanizeIntensity,
     loadFile,
     performClean,
     performHumanize,
