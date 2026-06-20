@@ -29,6 +29,8 @@ export const useAIDetector = () => {
         transitionScore: 0,
         perfectionScore: 0,
         voiceScore: 0,
+        vocabularyScore: 0,
+        depthScore: 0,
         details: [],
       };
     }
