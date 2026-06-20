@@ -7,9 +7,17 @@ interface CleaningResult {
   totalCleaned: number;
 }
 
+export interface ChangeLog {
+  type: string;
+  original: string;
+  replacement: string;
+  reason: string;
+}
+
 interface HumanizeResult {
   humanizedText: string;
   modificationsCount: number;
+  changeLog: ChangeLog[];
 }
 
 export type HumanizeIntensity = "light" | "moderate" | "aggressive";
