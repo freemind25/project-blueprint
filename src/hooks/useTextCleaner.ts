@@ -106,8 +106,33 @@ export const useTextCleaner = () => {
       [/\bEn ce qui concerne/gi, ["Pour ce qui est de", "Côté", "Question", "Sur"]],
     ];
 
-    // Appliquer les remplacements de transitions
-    transitionReplacements.forEach(([pattern, replacements]) => {
+    // 1b. English transition replacements (so it works on English text too)
+    const englishTransitionReplacements: [RegExp, string[]][] = [
+      [/\bFurthermore,/gi, ["On top of that,", "Plus,", "And also,", "Besides,"]],
+      [/\bMoreover,/gi, ["What's more,", "On top of that,", "Also,", "Plus,"]],
+      [/\bHowever,/gi, ["But,", "Still,", "That said,", "Then again,"]],
+      [/\bTherefore,/gi, ["So,", "That's why", "Which means", "As a result,"]],
+      [/\bConsequently,/gi, ["So,", "As a result,", "Because of that,"]],
+      [/\bIn addition,/gi, ["Also,", "On top of that,", "Plus,", "And,"]],
+      [/\bNevertheless,/gi, ["Even so,", "Still,", "That said,", "Anyway,"]],
+      [/\bNonetheless,/gi, ["Still,", "Even so,", "Anyway,"]],
+      [/\bAdditionally,/gi, ["Also,", "Plus,", "And,", "On top of that,"]],
+      [/\bThus,/gi, ["So,", "That way,", "Which is why"]],
+      [/\bHence,/gi, ["So,", "That's why", "Which is why"]],
+      [/\bIn conclusion,/gi, ["To wrap up,", "All in all,", "In short,", "So,"]],
+      [/\bIn summary,/gi, ["In short,", "To sum up,", "Basically,"]],
+      [/\bIt is important to note that/gi, ["Worth noting:", "Keep in mind that", "Note that", "Just so you know,"]],
+      [/\bIt is important to consider/gi, ["It helps to think about", "Worth considering", "Keep in mind"]],
+      [/\bIt should be noted that/gi, ["Note that", "Worth mentioning:", "Keep in mind that"]],
+      [/\bIn order to/gi, ["To", "So as to", "Just to"]],
+      [/\bAs a result,/gi, ["So,", "Because of that,", "Which means"]],
+      [/\bFirstly,/gi, ["First,", "To start,", "For starters,"]],
+      [/\bSecondly,/gi, ["Second,", "Then,", "Next,"]],
+      [/\bIn contrast,/gi, ["On the other hand,", "Then again,", "But,"]],
+    ];
+
+    // Appliquer les remplacements de transitions (FR + EN)
+    [...transitionReplacements, ...englishTransitionReplacements].forEach(([pattern, replacements]) => {
       result = result.replace(pattern, (match) => {
         if (Math.random() > t.base) {
           modifications++;
@@ -173,7 +198,30 @@ export const useTextCleaner = () => {
       [/\badéquat\b/gi, ["adapté", "bon", "correct"]],
     ];
 
-    informalReplacements.forEach(([pattern, replacements]) => {
+    // 4b. English formal -> informal word replacements
+    const englishInformalReplacements: [RegExp, string[]][] = [
+      [/\butilize\b/gi, ["use", "go with"]],
+      [/\butilise\b/gi, ["use", "go with"]],
+      [/\bfacilitate\b/gi, ["help", "make easier", "ease"]],
+      [/\bdemonstrate\b/gi, ["show", "prove"]],
+      [/\bnumerous\b/gi, ["many", "a lot of", "lots of"]],
+      [/\bsignificant\b/gi, ["big", "major", "notable"]],
+      [/\bsubstantial\b/gi, ["big", "large", "sizable"]],
+      [/\boptimal\b/gi, ["best", "ideal", "perfect"]],
+      [/\bfundamental\b/gi, ["basic", "core", "key"]],
+      [/\bspecific\b/gi, ["particular", "exact", "certain"]],
+      [/\bappropriate\b/gi, ["right", "fitting", "suitable"]],
+      [/\badequate\b/gi, ["enough", "fine", "decent"]],
+      [/\bcommence\b/gi, ["start", "begin"]],
+      [/\bobtain\b/gi, ["get", "grab"]],
+      [/\bprovide\b/gi, ["give", "offer"]],
+      [/\brequire\b/gi, ["need", "call for"]],
+      [/\bassist\b/gi, ["help"]],
+      [/\bregarding\b/gi, ["about", "on"]],
+      [/\bconsequently\b/gi, ["so", "as a result"]],
+    ];
+
+    [...informalReplacements, ...englishInformalReplacements].forEach(([pattern, replacements]) => {
       result = result.replace(pattern, (match) => {
         if (Math.random() > t.medium) {
           modifications++;
