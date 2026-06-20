@@ -7,6 +7,8 @@ export interface AIAnalysisResult {
   transitionScore: number;
   perfectionScore: number;
   voiceScore: number;
+  vocabularyScore: number;
+  depthScore: number;
   details: AnalysisDetail[];
 }
 
@@ -27,6 +29,8 @@ export const useAIDetector = () => {
         transitionScore: 0,
         perfectionScore: 0,
         voiceScore: 0,
+        vocabularyScore: 0,
+        depthScore: 0,
         details: [],
       };
     }
@@ -199,13 +203,68 @@ export const useAIDetector = () => {
       });
     }
 
+    // 6. Generic vocabulary & lack of nuance
+    const lexicalSet = new Set(words.filter(w => w.length > 3));
+    const lexicalDiversity = words.length > 0 ? lexicalSet.size / words.length : 1;
+    // Markers of nuance / personal voice (richer vocabulary)
+    const nuanceMarkers = /\bpar exemple\b|\bjuste\b|\bvraiment\b|\bplutôt\b|\bun peu\b|\bcarrément\b|\bfranchement\b|—|\(/gi;
+    const nuanceCount = (text.match(nuanceMarkers) || []).length;
+    // Low diversity + few nuance markers => generic vocabulary
+    let vocabularyScore = Math.round(Math.max(0, Math.min(100, (1 - lexicalDiversity) * 120)));
+    if (nuanceCount < 2 && text.length > 300) vocabularyScore = Math.min(100, vocabularyScore + 25);
+    if (lexicalDiversity < 0.45 || (nuanceCount < 2 && text.length > 300)) {
+      details.push({
+        category: "Vocabulaire générique",
+        issue: "Vocabulaire « sûr » et conventionnel, manque de jargon, de métaphores ou de nuances personnelles",
+        severity: lexicalDiversity < 0.35 ? "high" : "medium",
+        examples: [
+          `Diversité lexicale: ${(lexicalDiversity * 100).toFixed(0)}%`,
+          `Marqueurs de nuance: ${nuanceCount}`,
+        ],
+      });
+    }
+
+    // 7. Surface-level coherence / superficial depth (filler sentences)
+    const fillerPhrases = [
+      /\bil est important de (considérer|tenir compte|souligner|rappeler)\b/gi,
+      /\bil convient de (souligner|noter|rappeler)\b/gi,
+      /\bcela soulève des questions importantes\b/gi,
+      /\bdans un monde (en constante évolution|de plus en plus)\b/gi,
+      /\bjoue un rôle (clé|crucial|central|essentiel)\b/gi,
+      /\bde nombreux (facteurs|aspects|éléments)\b/gi,
+      /\bil est essentiel de comprendre\b/gi,
+      /\bà l'ère (du numérique|moderne)\b/gi,
+      /\bun enjeu majeur\b/gi,
+      /\bouvre la voie à\b/gi,
+      /\bil ne fait aucun doute que\b/gi,
+      /\bprendre en compte (tous les|différents) (aspects|points de vue)\b/gi,
+    ];
+    const foundFiller: string[] = [];
+    fillerPhrases.forEach(pattern => {
+      const match = text.match(pattern);
+      if (match) foundFiller.push(`"${match[0]}"`);
+    });
+    const sentenceCount = sentences.length || 1;
+    const fillerDensity = (foundFiller.length / sentenceCount) * 100;
+    const depthScore = Math.min(100, foundFiller.length * 22 + fillerDensity);
+    if (foundFiller.length > 1) {
+      details.push({
+        category: "Profondeur superficielle",
+        issue: "Phrases de remplissage cohérentes en surface mais sans contenu substantiel",
+        severity: foundFiller.length > 3 ? "high" : "medium",
+        examples: foundFiller.slice(0, 4),
+      });
+    }
+
     // Calculate overall score
     const overallScore = Math.round(
-      (burstinessScore * 0.25) +
-      (transitionScore * 0.25) +
-      (perfectionScore * 0.2) +
-      (voiceScore * 0.15) +
-      (perplexityScore * 0.15)
+      (burstinessScore * 0.2) +
+      (transitionScore * 0.2) +
+      (perfectionScore * 0.15) +
+      (voiceScore * 0.12) +
+      (perplexityScore * 0.11) +
+      (vocabularyScore * 0.1) +
+      (depthScore * 0.12)
     );
 
     return {
@@ -215,6 +274,8 @@ export const useAIDetector = () => {
       transitionScore: Math.round(transitionScore),
       perfectionScore: Math.round(perfectionScore),
       voiceScore: Math.round(voiceScore),
+      vocabularyScore: Math.round(vocabularyScore),
+      depthScore: Math.round(depthScore),
       details,
     };
   }, []);
