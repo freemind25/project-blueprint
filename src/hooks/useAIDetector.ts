@@ -7,6 +7,8 @@ export interface AIAnalysisResult {
   transitionScore: number;
   perfectionScore: number;
   voiceScore: number;
+  vocabularyScore: number;
+  depthScore: number;
   details: AnalysisDetail[];
 }
 
