@@ -1,6 +1,6 @@
 import React from "react";
 import { AIAnalysisResult } from "@/hooks/useAIDetector";
-import { AlertTriangle, CheckCircle, XCircle, Bot, Brain, Sparkles, MessageSquare, Gauge } from "lucide-react";
+import { AlertTriangle, CheckCircle, XCircle, Bot, Brain, Sparkles, MessageSquare, Gauge, BookOpen, Layers } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface AIAnalysisProps {
@@ -131,6 +131,16 @@ export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing }) =
           label="Perplexité" 
           score={result.perplexityScore} 
           icon={<Brain className="w-3 h-3" />} 
+        />
+        <ScoreBar 
+          label="Vocabulaire" 
+          score={result.vocabularyScore} 
+          icon={<BookOpen className="w-3 h-3" />} 
+        />
+        <ScoreBar 
+          label="Profondeur" 
+          score={result.depthScore} 
+          icon={<Layers className="w-3 h-3" />} 
         />
       </div>
 
