@@ -195,6 +195,13 @@ export const TextCleaner: React.FC = () => {
               />
             </div>
           )}
+
+          {/* Humanize change log */}
+          {isHumanized && humanizeStats && (
+            <div className="mt-8 animate-fade-in" style={{ animationDelay: "0.45s" }}>
+              <HumanizeLog changeLog={humanizeStats.changeLog} />
+            </div>
+          )}
         </main>
 
         {/* Footer */}
