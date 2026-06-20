@@ -7,6 +7,7 @@ import { ActionBar } from "./ActionBar";
 import { CleaningStats } from "./CleaningStats";
 import { IntensitySlider } from "./IntensitySlider";
 import { AIAnalysis } from "./AIAnalysis";
+import { HumanizeLog } from "./HumanizeLog";
 import { useTextCleaner } from "@/hooks/useTextCleaner";
 import { useAIDetector, AIAnalysisResult } from "@/hooks/useAIDetector";
 import { FileText, AlertTriangle } from "lucide-react";
