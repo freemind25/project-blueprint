@@ -191,8 +191,8 @@ export const HumanizeLog: React.FC<HumanizeLogProps> = ({ changeLog }) => {
     <div className="rounded-xl border border-border bg-card p-6 space-y-5">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-violet-500/10 to-purple-500/10">
-            <ArrowRightLeft className="w-5 h-5 text-violet-500" />
+          <div className="p-2 rounded-lg bg-accent">
+            <ArrowRightLeft className="w-5 h-5 text-primary" />
           </div>
           <div>
             <h3 className="text-base font-semibold text-foreground">Journal des modifications</h3>
