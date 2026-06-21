@@ -207,7 +207,7 @@ export const TextCleaner: React.FC = () => {
         {/* Footer */}
         <footer className="mt-16 pt-8 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
-            Traitement 100% local • Aucune donnée envoyée vers un serveur
+            Traitement 100% local - aucune donnée envoyée vers un serveur
           </p>
         </footer>
       </div>
