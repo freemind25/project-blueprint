@@ -17,13 +17,14 @@ export const TextCleaner: React.FC = () => {
   useEffect(() => {
     if (!text || text.length < 50) return;
 
-    const handle = (window as any).requestIdleCallback(() => {
+    const win = window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number; cancelIdleCallback: (id: number) => void };
+    const handle = win.requestIdleCallback(() => {
       const result = analyzeText(text);
       console.log("Background Analysis Result:", result);
       // Ici, on pourrait mettre à jour un état local pour afficher le score en temps réel
     }, { timeout: 2000 });
 
-    return () => (window as any).cancelIdleCallback(handle);
+    return () => win.cancelIdleCallback(handle);
   }, [text, analyzeText]);
 
   return (

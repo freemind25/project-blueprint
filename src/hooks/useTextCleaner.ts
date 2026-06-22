@@ -8,8 +8,8 @@ export const useTextCleaner = () => {
   const [isHumanizing, setIsHumanizing] = useState(false);
   const [isCleaned, setIsCleaned] = useState(false);
   const [isHumanized, setIsHumanized] = useState(false);
-  const [stats, setStats] = useState<any>(null);
-  const [humanizeStats, setHumanizeStats] = useState<any>(null);
+  const [stats, setStats] = useState<{ nbspCount: number; narrowNbspCount: number; totalCleaned: number } | null>(null);
+  const [humanizeStats, setHumanizeStats] = useState<{ humanizedText: string; modificationsCount: number; changeLog: Array<{ type: string; original: string; replacement: string; reason: string }> } | null>(null);
   const [intensity, setIntensity] = useState<HumanizeIntensity>("moderate");
 
   // Web Worker Ref

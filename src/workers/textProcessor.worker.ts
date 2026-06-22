@@ -37,7 +37,7 @@ function performClean(inputText: string) {
 function performHumanize(inputText: string, intensity: "light" | "moderate" | "aggressive") {
   let result = inputText;
   let modifications = 0;
-  const changeLog: any[] = [];
+  const changeLog: Array<{ type: string; original: string; replacement: string; reason: string }> = [];
 
   // 1. Remplacement de transitions (Exemple simplifié)
   const transitions: [RegExp, string[]][] = [
