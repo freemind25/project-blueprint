@@ -1,17 +1,21 @@
 import React from "react";
-import { Sparkles } from "lucide-react";
+import logoAsset from "@/assets/logo-unrobot.png.asset.json";
 
 export const Header: React.FC = () => {
   return (
     <header className="text-center mb-12 animate-fade-in">
-      <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-accent mb-6">
-        <Sparkles className="w-8 h-8 text-primary" />
+      <div className="inline-flex items-center justify-center mb-6">
+        <img
+          src={logoAsset.url}
+          alt="UnRobot"
+          className="h-20 w-auto"
+        />
       </div>
-      
+
       <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
         Nettoyeur de Texte
       </h1>
-      
+
       <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
         Supprimez les caractères invisibles de vos fichiers texte.
         <br />
