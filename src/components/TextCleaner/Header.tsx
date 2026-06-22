@@ -10,7 +10,7 @@ export const Header: React.FC = () => {
           alt=""
           className="h-20 w-auto"
         />
-        <span className="text-5xl sm:text-6xl font-black tracking-tighter leading-none text-primary drop-shadow-sm">
+        <span className="text-5xl sm:text-6xl font-extrabold tracking-tighter leading-none text-primary">
           UnRobot
         </span>
       </div>
