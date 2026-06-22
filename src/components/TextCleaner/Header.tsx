@@ -4,12 +4,15 @@ import logoAsset from "@/assets/logo-unrobot.png.asset.json";
 export const Header: React.FC = () => {
   return (
     <header className="text-center mb-12 animate-fade-in">
-      <div className="inline-flex items-center justify-center mb-6">
+      <div className="inline-flex items-center gap-4 justify-center mb-6">
         <img
           src={logoAsset.url}
-          alt="UnRobot"
+          alt=""
           className="h-20 w-auto"
         />
+        <span className="text-5xl sm:text-6xl font-bold tracking-tighter leading-none text-foreground">
+          UnRobot
+        </span>
       </div>
 
       <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
