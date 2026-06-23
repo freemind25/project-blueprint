@@ -1,44 +1,129 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { useTextCleaner } from "@/hooks/useTextCleaner";
-import { useAIDetector } from "@/hooks/useAIDetector";
+import { useAIDetector, AIAnalysisResult } from "@/hooks/useAIDetector";
 import { Header } from "./Header";
 import { TextEditor } from "./TextEditor";
 import { ActionBar } from "./ActionBar";
+import { IntensitySlider } from "./IntensitySlider";
+import { CleaningStats } from "./CleaningStats";
+import { HumanizeLog } from "./HumanizeLog";
+import { AIAnalysis } from "./AIAnalysis";
 
 export const TextCleaner: React.FC = () => {
-  const { 
-    text, setText, performClean, performHumanize, clearAll, 
-    isProcessing, isHumanizing, intensity, setIntensity 
+  const {
+    text,
+    setText,
+    performClean,
+    performHumanize,
+    clearAll,
+    isProcessing,
+    isHumanizing,
+    isCleaned,
+    isHumanized,
+    stats,
+    humanizeStats,
+    intensity,
+    setIntensity,
   } = useTextCleaner();
-  
+
   const { analyzeText } = useAIDetector();
 
-  // Analyse en arrière-plan avec requestIdleCallback
+  const [isCopied, setIsCopied] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null);
+
+  const hasText = text.trim().length > 0;
+
+  const handleAnalyze = useCallback(() => {
+    if (!hasText) return;
+    setIsAnalyzing(true);
+    // Calcul léger, on simule un court délai pour le retour visuel
+    window.requestAnimationFrame(() => {
+      const result = analyzeText(text);
+      setAnalysis(result);
+      setIsAnalyzing(false);
+    });
+  }, [text, hasText, analyzeText]);
+
+  const handleCopy = useCallback(async () => {
+    if (!hasText) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      toast.success("Texte copié dans le presse-papiers");
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch {
+      toast.error("Impossible de copier le texte");
+    }
+  }, [text, hasText]);
+
+  const handleDownload = useCallback(() => {
+    if (!hasText) return;
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "texte-unrobot.txt";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Fichier téléchargé");
+  }, [text, hasText]);
+
+  const handleClear = useCallback(() => {
+    clearAll();
+    setAnalysis(null);
+  }, [clearAll]);
+
+  // Analyse en arrière-plan (mise à jour discrète du score)
   useEffect(() => {
     if (!text || text.length < 50) return;
-
-    const win = window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number; cancelIdleCallback: (id: number) => void };
+    const win = window as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (!win.requestIdleCallback) return;
     const handle = win.requestIdleCallback(() => {
-      const result = analyzeText(text);
-      console.log("Background Analysis Result:", result);
-      // Ici, on pourrait mettre à jour un état local pour afficher le score en temps réel
+      setAnalysis(analyzeText(text));
     }, { timeout: 2000 });
-
-    return () => win.cancelIdleCallback(handle);
+    return () => win.cancelIdleCallback?.(handle);
   }, [text, analyzeText]);
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="container mx-auto max-w-4xl p-4 space-y-6">
       <Header />
       <TextEditor value={text} onChange={setText} />
-      <ActionBar 
-        onClean={performClean} 
-        onHumanize={performHumanize} 
-        onClear={clearAll}
+      <IntensitySlider value={intensity} onChange={setIntensity} />
+      <ActionBar
+        onClean={performClean}
+        onHumanize={performHumanize}
+        onDownload={handleDownload}
+        onClear={handleClear}
+        onCopy={handleCopy}
+        onAnalyze={handleAnalyze}
+        hasText={hasText}
+        isCleaned={isCleaned}
+        isHumanized={isHumanized}
+        isCopied={isCopied}
         isProcessing={isProcessing}
         isHumanizing={isHumanizing}
+        isAnalyzing={isAnalyzing}
       />
-      {/* Autres composants de stats et d'analyse */}
+
+      {stats && (
+        <CleaningStats
+          nbspCount={stats.nbspCount}
+          narrowNbspCount={stats.narrowNbspCount}
+          totalCleaned={stats.totalCleaned}
+          isVisible={isCleaned}
+        />
+      )}
+
+      <AIAnalysis result={analysis} isAnalyzing={isAnalyzing} />
+
+      {humanizeStats && <HumanizeLog changeLog={humanizeStats.changeLog} />}
     </div>
   );
 };

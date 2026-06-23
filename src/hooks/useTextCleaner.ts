@@ -2,14 +2,33 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 
 export type HumanizeIntensity = "light" | "moderate" | "aggressive";
 
+export interface ChangeLog {
+  type: string;
+  original: string;
+  replacement: string;
+  reason: string;
+}
+
+export interface CleanStats {
+  nbspCount: number;
+  narrowNbspCount: number;
+  totalCleaned: number;
+}
+
+export interface HumanizeStats {
+  humanizedText: string;
+  modificationsCount: number;
+  changeLog: ChangeLog[];
+}
+
 export const useTextCleaner = () => {
   const [text, setText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isHumanizing, setIsHumanizing] = useState(false);
   const [isCleaned, setIsCleaned] = useState(false);
   const [isHumanized, setIsHumanized] = useState(false);
-  const [stats, setStats] = useState<{ nbspCount: number; narrowNbspCount: number; totalCleaned: number } | null>(null);
-  const [humanizeStats, setHumanizeStats] = useState<{ humanizedText: string; modificationsCount: number; changeLog: Array<{ type: string; original: string; replacement: string; reason: string }> } | null>(null);
+  const [stats, setStats] = useState<CleanStats | null>(null);
+  const [humanizeStats, setHumanizeStats] = useState<HumanizeStats | null>(null);
   const [intensity, setIntensity] = useState<HumanizeIntensity>("moderate");
 
   // Web Worker Ref
