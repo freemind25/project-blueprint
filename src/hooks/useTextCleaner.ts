@@ -1,25 +1,15 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import type {
+  HumanizeIntensity,
+  HumanizeMode,
+  HumanizeStats,
+  ChangeLog,
+} from "@/lib/humanizer";
+import type { CleanStats } from "@/lib/cleaner";
+import type { WriterProfile } from "@/lib/writerProfile";
 
-export type HumanizeIntensity = "light" | "moderate" | "aggressive";
-
-export interface ChangeLog {
-  type: string;
-  original: string;
-  replacement: string;
-  reason: string;
-}
-
-export interface CleanStats {
-  nbspCount: number;
-  narrowNbspCount: number;
-  totalCleaned: number;
-}
-
-export interface HumanizeStats {
-  humanizedText: string;
-  modificationsCount: number;
-  changeLog: ChangeLog[];
-}
+export type { HumanizeIntensity, HumanizeMode, HumanizeStats, ChangeLog };
+export type { CleanStats };
 
 export const useTextCleaner = () => {
   const [text, setText] = useState("");
@@ -30,14 +20,15 @@ export const useTextCleaner = () => {
   const [stats, setStats] = useState<CleanStats | null>(null);
   const [humanizeStats, setHumanizeStats] = useState<HumanizeStats | null>(null);
   const [intensity, setIntensity] = useState<HumanizeIntensity>("moderate");
+  const [mode, setMode] = useState<HumanizeMode>("naturel");
+  const [untilNatural, setUntilNatural] = useState(false);
+  const [profile, setProfile] = useState<WriterProfile | null>(null);
 
-  // Web Worker Ref
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    // Initialisation du worker
     workerRef.current = new Worker(new URL("../workers/textProcessor.worker.ts", import.meta.url), { type: "module" });
-    
+
     workerRef.current.onmessage = (e) => {
       const { action, result } = e.data;
       if (action === "clean") {
@@ -56,7 +47,6 @@ export const useTextCleaner = () => {
     return () => workerRef.current?.terminate();
   }, []);
 
-  // Utilisation de useCallback pour les fonctions exposées
   const performClean = useCallback(() => {
     if (!text || !workerRef.current) return;
     setIsProcessing(true);
@@ -66,8 +56,19 @@ export const useTextCleaner = () => {
   const performHumanize = useCallback(() => {
     if (!text || !workerRef.current) return;
     setIsHumanizing(true);
-    workerRef.current.postMessage({ action: "humanize", text, options: { intensity } });
-  }, [text, intensity]);
+    workerRef.current.postMessage({
+      action: "humanize",
+      text,
+      options: {
+        intensity,
+        mode,
+        // "Humanize until natural" : on vise un score IA <= 30%.
+        targetScore: untilNatural ? 30 : undefined,
+        maxPasses: 6,
+        profile,
+      },
+    });
+  }, [text, intensity, mode, untilNatural, profile]);
 
   const clearAll = useCallback(() => {
     setText("");
@@ -77,7 +78,6 @@ export const useTextCleaner = () => {
     setHumanizeStats(null);
   }, []);
 
-  // Memoization de valeurs dérivées
   const wordCount = useMemo(() => {
     return text.trim() ? text.trim().split(/\s+/).length : 0;
   }, [text]);
@@ -93,9 +93,15 @@ export const useTextCleaner = () => {
     humanizeStats,
     intensity,
     setIntensity,
+    mode,
+    setMode,
+    untilNatural,
+    setUntilNatural,
+    profile,
+    setProfile,
     performClean,
     performHumanize,
     clearAll,
-    wordCount
+    wordCount,
   };
 };

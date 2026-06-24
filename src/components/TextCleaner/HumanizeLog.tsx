@@ -22,6 +22,13 @@ import {
 
 interface HumanizeLogProps {
   changeLog: ChangeLog[];
+  summary?: {
+    passes: number;
+    scoreBefore: number;
+    scoreAfter: number;
+    mode: string;
+    intensity: string;
+  };
 }
 
 const typeMeta: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
@@ -77,12 +84,34 @@ const typeMeta: Record<string, { label: string; icon: React.ReactNode; color: st
   },
 };
 
-export const HumanizeLog: React.FC<HumanizeLogProps> = ({ changeLog }) => {
+export const HumanizeLog: React.FC<HumanizeLogProps> = ({ changeLog, summary }) => {
   const [expandedTypes, setExpandedTypes] = React.useState<Record<string, boolean>>({});
+
+  const summaryBanner = summary ? (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+      <div className="p-2 rounded border border-border bg-background/40">
+        <div className="font-semibold capitalize">{summary.mode}</div>
+        <div className="text-muted-foreground">mode</div>
+      </div>
+      <div className="p-2 rounded border border-border bg-background/40">
+        <div className="font-semibold">{summary.passes}</div>
+        <div className="text-muted-foreground">passe{summary.passes > 1 ? "s" : ""}</div>
+      </div>
+      <div className="p-2 rounded border border-border bg-background/40">
+        <div className="font-semibold">{summary.scoreBefore}% → {summary.scoreAfter}%</div>
+        <div className="text-muted-foreground">score IA</div>
+      </div>
+      <div className="p-2 rounded border border-border bg-background/40">
+        <div className="font-semibold capitalize">{summary.intensity}</div>
+        <div className="text-muted-foreground">intensité</div>
+      </div>
+    </div>
+  ) : null;
 
   if (!changeLog.length) {
     return (
       <div className="rounded-xl border border-border bg-card p-6">
+        {summaryBanner}
         <div className="flex items-start gap-3">
           <Info className="w-5 h-5 text-muted-foreground mt-0.5" />
           <div>
@@ -189,6 +218,7 @@ export const HumanizeLog: React.FC<HumanizeLogProps> = ({ changeLog }) => {
 
   return (
     <div className="rounded-xl border border-border bg-card p-6 space-y-5">
+      {summaryBanner}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-accent">
