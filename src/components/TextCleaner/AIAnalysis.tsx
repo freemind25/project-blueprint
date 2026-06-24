@@ -1,6 +1,6 @@
 import React from "react";
 import { AIAnalysisResult } from "@/hooks/useAIDetector";
-import { AlertTriangle, CheckCircle, XCircle, Bot, Brain, Sparkles, MessageSquare, Gauge, BookOpen, Layers } from "lucide-react";
+import { AlertTriangle, CheckCircle, XCircle, Bot, Brain, Sparkles, MessageSquare, Gauge, BookOpen, Layers, Wand2, Check, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface AIAnalysisProps {
@@ -144,6 +144,41 @@ export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing }) =
         />
       </div>
 
+      {/* Humanization & SUCKS overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+        <div className="p-3 rounded-md border border-border bg-background/40 text-center">
+          <div className="text-2xl font-bold text-green-500">{result.humanizationScore}%</div>
+          <p className="text-xs text-muted-foreground">Score d'humanisation</p>
+        </div>
+        <div className="p-3 rounded-md border border-border bg-background/40 text-center">
+          <div className="text-2xl font-bold text-primary">{result.sucksScore}</div>
+          <p className="text-xs text-muted-foreground">Score SUCKS</p>
+        </div>
+        <div className="p-3 rounded-md border border-border bg-background/40 text-center">
+          <div className="text-2xl font-bold text-foreground">{result.patternCount}</div>
+          <p className="text-xs text-muted-foreground">Motifs IA détectés</p>
+        </div>
+      </div>
+
+      {/* Pre-flight checklist */}
+      {result.checklist.length > 0 && (
+        <div className="space-y-2 pt-2">
+          <h4 className="text-sm font-medium text-muted-foreground">Checklist pré-envoi</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            {result.checklist.map((item, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs">
+                {item.passed ? (
+                  <Check className="w-4 h-4 text-green-500 flex-shrink-0" aria-label="Réussi" />
+                ) : (
+                  <X className="w-4 h-4 text-red-500 flex-shrink-0" aria-label="Échoué" />
+                )}
+                <span className={item.passed ? "text-muted-foreground" : "text-foreground"}>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Issues found */}
       {result.details.length > 0 && (
         <div className="space-y-2 pt-2">
@@ -171,6 +206,16 @@ export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing }) =
                           >
                             {example}
                           </span>
+                        ))}
+                      </div>
+                    )}
+                    {detail.suggestions && detail.suggestions.length > 0 && (
+                      <div className="mt-1 space-y-1">
+                        {detail.suggestions.map((s, i) => (
+                          <p key={i} className="flex items-start gap-1.5 text-xs text-primary">
+                            <Wand2 className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                            <span>{s}</span>
+                          </p>
                         ))}
                       </div>
                     )}
