@@ -180,7 +180,18 @@ export const TextCleaner: React.FC = () => {
 
       <AIAnalysis result={analysis} isAnalyzing={isAnalyzing} />
 
-      {humanizeStats && <HumanizeLog changeLog={humanizeStats.changeLog} />}
+      {humanizeStats && (
+        <HumanizeLog
+          changeLog={humanizeStats.changeLog}
+          summary={{
+            passes: humanizeStats.passes,
+            scoreBefore: humanizeStats.scoreBefore,
+            scoreAfter: humanizeStats.scoreAfter,
+            mode: humanizeStats.mode,
+            intensity: humanizeStats.intensity,
+          }}
+        />
+      )}
     </div>
   );
 };
