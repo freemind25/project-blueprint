@@ -9,9 +9,12 @@ import { IntensitySlider } from "./IntensitySlider";
 import { CleaningStats } from "./CleaningStats";
 import { HumanizeLog } from "./HumanizeLog";
 import { AIAnalysis } from "./AIAnalysis";
+import { ModeSelector } from "./ModeSelector";
+import { WriterProfilePanel } from "./WriterProfilePanel";
 import { EXAMPLE_TEXTS } from "@/data/exampleTexts";
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
+import { FileText, FileJson, FileDown } from "lucide-react";
+import { downloadReportJSON, downloadReportPDF } from "@/lib/report";
 
 export const TextCleaner: React.FC = () => {
   const {
@@ -28,6 +31,12 @@ export const TextCleaner: React.FC = () => {
     humanizeStats,
     intensity,
     setIntensity,
+    mode,
+    setMode,
+    untilNatural,
+    setUntilNatural,
+    profile,
+    setProfile,
   } = useTextCleaner();
 
   const { analyzeText } = useAIDetector();
@@ -80,6 +89,17 @@ export const TextCleaner: React.FC = () => {
     setAnalysis(null);
   }, [clearAll]);
 
+  const handleReportJSON = useCallback(() => {
+    if (!hasText) return;
+    downloadReportJSON({ generatedAt: new Date().toISOString(), text, analysis, humanize: humanizeStats });
+    toast.success("Rapport JSON téléchargé");
+  }, [hasText, text, analysis, humanizeStats]);
+
+  const handleReportPDF = useCallback(() => {
+    if (!hasText) return;
+    downloadReportPDF({ generatedAt: new Date().toISOString(), text, analysis, humanize: humanizeStats });
+  }, [hasText, text, analysis, humanizeStats]);
+
   // Analyse en arrière-plan (mise à jour discrète du score)
   useEffect(() => {
     if (!text || text.length < 50) return;
@@ -115,7 +135,14 @@ export const TextCleaner: React.FC = () => {
         ))}
       </div>
       <TextEditor value={text} onChange={setText} />
+      <ModeSelector
+        mode={mode}
+        onModeChange={setMode}
+        untilNatural={untilNatural}
+        onUntilNaturalChange={setUntilNatural}
+      />
       <IntensitySlider value={intensity} onChange={setIntensity} />
+      <WriterProfilePanel profile={profile} onProfileChange={setProfile} />
       <ActionBar
         onClean={performClean}
         onHumanize={performHumanize}
@@ -131,6 +158,16 @@ export const TextCleaner: React.FC = () => {
         isHumanizing={isHumanizing}
         isAnalyzing={isAnalyzing}
       />
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground">Rapport :</span>
+        <Button variant="outline" size="sm" onClick={handleReportJSON} disabled={!hasText}>
+          <FileJson className="w-3.5 h-3.5" /> JSON
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleReportPDF} disabled={!hasText}>
+          <FileDown className="w-3.5 h-3.5" /> PDF
+        </Button>
+      </div>
 
       {stats && (
         <CleaningStats
