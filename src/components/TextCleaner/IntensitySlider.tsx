@@ -8,10 +8,30 @@ interface IntensitySliderProps {
   onChange: (value: HumanizeIntensity) => void;
 }
 
-const intensityLevels: { value: HumanizeIntensity; label: string; description: string }[] = [
-  { value: "light", label: "Léger", description: "Modifications subtiles" },
-  { value: "moderate", label: "Modéré", description: "Équilibre naturel" },
-  { value: "aggressive", label: "Agressif", description: "Transformations profondes" },
+const intensityLevels: {
+  value: HumanizeIntensity;
+  label: string;
+  description: string;
+  actions: string[];
+}[] = [
+  {
+    value: "light",
+    label: "Léger",
+    description: "Supprime les AI tells évidents",
+    actions: ["Retire les constructions corrélatives", "Corrige l'excès de « just »", "Supprime les phrases interdites"],
+  },
+  {
+    value: "moderate",
+    label: "Modéré",
+    description: "Applique le framework SUCKS",
+    actions: ["Tout le niveau Léger", "Corrige la voix passive", "Retire le jargon corporate", "Améliore la clarté"],
+  },
+  {
+    value: "aggressive",
+    label: "Agressif",
+    description: "Réécriture pour transfert d'énergie",
+    actions: ["Tout le niveau Modéré", "Phrases percutantes", "Ton conversationnel", "Variation des longueurs"],
+  },
 ];
 
 const intensityToValue = (intensity: HumanizeIntensity): number => {
@@ -73,6 +93,15 @@ export const IntensitySlider: React.FC<IntensitySliderProps> = ({ value, onChang
       <p className="text-xs text-muted-foreground text-center mt-1">
         {currentLevel.description}
       </p>
+
+      <ul className="text-xs text-muted-foreground space-y-1 mt-1">
+        {currentLevel.actions.map((action) => (
+          <li key={action} className="flex items-center gap-1.5">
+            <span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />
+            {action}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
