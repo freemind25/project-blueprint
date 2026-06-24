@@ -9,6 +9,9 @@ import { IntensitySlider } from "./IntensitySlider";
 import { CleaningStats } from "./CleaningStats";
 import { HumanizeLog } from "./HumanizeLog";
 import { AIAnalysis } from "./AIAnalysis";
+import { EXAMPLE_TEXTS } from "@/data/exampleTexts";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
 export const TextCleaner: React.FC = () => {
   const {
@@ -94,6 +97,23 @@ export const TextCleaner: React.FC = () => {
   return (
     <div className="container mx-auto max-w-4xl p-4 space-y-6">
       <Header />
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground">Charger un exemple :</span>
+        {EXAMPLE_TEXTS.map((ex) => (
+          <Button
+            key={ex.id}
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setText(ex.content);
+              setAnalysis(null);
+            }}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            {ex.title}
+          </Button>
+        ))}
+      </div>
       <TextEditor value={text} onChange={setText} />
       <IntensitySlider value={intensity} onChange={setIntensity} />
       <ActionBar
