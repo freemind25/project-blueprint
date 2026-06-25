@@ -11,7 +11,7 @@ export const Header: React.FC = () => {
       <div className="inline-flex items-center gap-4 justify-center mb-6">
         <img
           src={logoAsset.url}
-          alt=""
+          alt="Logo UnRobot"
           className="h-20 w-auto"
         />
         <span className="text-5xl sm:text-6xl font-extrabold tracking-tighter leading-none text-primary">
@@ -24,7 +24,7 @@ export const Header: React.FC = () => {
       </h1>
 
       <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-        Supprimez les caractères invisibles de vos fichiers texte.
+        Supprimez les caractères invisibles de vos textes.
         <br />
         <span className="text-sm">
           Espaces insécables (U+00A0) et espaces minces (U+202F) issus de l'IA ou de copier-coller.

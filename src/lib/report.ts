@@ -1,5 +1,6 @@
 import type { AIAnalysisResult } from "./textAnalysis";
 import type { HumanizeStats } from "./humanizer";
+import { toast } from "sonner";
 
 export interface ReportData {
   generatedAt: string;
@@ -76,8 +77,12 @@ ${a && a.details.length ? `<h2>Problèmes détectés</h2><ul>${a.details.map((d)
 </body></html>`;
 
   const w = window.open("", "_blank");
-  if (!w) return;
+  if (!w) {
+    toast.error("Veuillez autoriser les fenêtres popups pour générer le rapport PDF");
+    return;
+  }
   w.document.open();
   w.document.write(html);
   w.document.close();
+  toast.success("Rapport PDF prêt à imprimer/enregistrer");
 }
