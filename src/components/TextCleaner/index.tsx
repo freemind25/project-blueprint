@@ -38,6 +38,10 @@ export const TextCleaner: React.FC = () => {
     setUntilNatural,
     profile,
     setProfile,
+    profiles,
+    saveProfile,
+    deleteProfile,
+    selectProfile,
     undo,
     canUndo,
   } = useTextCleaner();
@@ -155,7 +159,14 @@ export const TextCleaner: React.FC = () => {
         onUntilNaturalChange={setUntilNatural}
       />
       <IntensitySlider value={intensity} onChange={setIntensity} />
-      <WriterProfilePanel profile={profile} onProfileChange={setProfile} />
+      <WriterProfilePanel
+        profile={profile}
+        profiles={profiles}
+        onProfileChange={setProfile}
+        onSaveProfile={saveProfile}
+        onDeleteProfile={deleteProfile}
+        onSelectProfile={selectProfile}
+      />
       <ActionBar
         onClean={performClean}
         onHumanize={performHumanize}

@@ -130,7 +130,33 @@ const detectStaccato = (sentences: string[]): number => {
 };
 
 /** Analyse complète d'un texte. Pure, déterministe (hors aléatoire : aucun). */
-export function analyzeText(text: string): AIAnalysisResult {
+/**
+ * Facteurs de sévérité par mode : ajustent les poids des métriques
+ * selon le registre attendu. Le mode "naturel" tolère davantage
+ * de marqueurs d'oralité ; le mode "academique" est plus strict
+ * sur les transitions et la voix générique.
+ */
+export type AnalysisMode = "naturel" | "professionnel" | "academique" | "expert" | "personnel";
+
+interface ModeWeights {
+  burstiness: number;
+  transition: number;
+  perfection: number;
+  voice: number;
+  perplexity: number;
+  vocabulary: number;
+  depth: number;
+}
+
+const MODE_WEIGHTS: Record<AnalysisMode, ModeWeights> = {
+  naturel:        { burstiness: 0.20, transition: 0.10, perfection: 0.10, voice: 0.20, perplexity: 0.10, vocabulary: 0.10, depth: 0.10 },
+  personnel:      { burstiness: 0.15, transition: 0.10, perfection: 0.05, voice: 0.20, perplexity: 0.10, vocabulary: 0.10, depth: 0.10 },
+  professionnel:  { burstiness: 0.20, transition: 0.15, perfection: 0.15, voice: 0.20, perplexity: 0.10, vocabulary: 0.10, depth: 0.10 },
+  academique:     { burstiness: 0.15, transition: 0.20, perfection: 0.20, voice: 0.25, perplexity: 0.10, vocabulary: 0.10, depth: 0.10 },
+  expert:         { burstiness: 0.20, transition: 0.15, perfection: 0.15, voice: 0.25, perplexity: 0.10, vocabulary: 0.10, depth: 0.10 },
+};
+
+export function analyzeText(text: string, mode?: AnalysisMode): AIAnalysisResult {
   if (!text || text.length < 50) {
     return {
       score: 0,
@@ -268,14 +294,16 @@ export function analyzeText(text: string): AIAnalysisResult {
     });
   }
 
+  // Pondération dynamique selon le mode
+  const w = MODE_WEIGHTS[mode ?? "naturel"];
   const score = clamp(
-    burstinessScore * 0.2 +
-      transitionScore * 0.15 +
-      perfectionScore * 0.15 +
-      voiceScore * 0.2 +
-      perplexityScore * 0.1 +
-      vocabularyScore * 0.1 +
-      depthScore * 0.1 +
+    burstinessScore * w.burstiness +
+      transitionScore * w.transition +
+      perfectionScore * w.perfection +
+      voiceScore * w.voice +
+      perplexityScore * w.perplexity +
+      vocabularyScore * w.vocabulary +
+      depthScore * w.depth +
       Math.min(40, patternPoints)
   );
 

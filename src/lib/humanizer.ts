@@ -165,6 +165,167 @@ const RULES: Rule[] = [
     minIntensity: "light",
     modes: ["professionnel", "expert", "academique"],
   },
+
+  // ═══════════════════════════════════════
+  // PHASE 0.4 — Variations lexicales/syntaxiques (bruit stylistique)
+  // ═══════════════════════════════════════
+
+  // --- Synonymes courants (FR) ---
+  {
+    type: "synonyme",
+    reason: "Variation lexicale : synonyme courant",
+    regex: /\bpermettre\b/gi,
+    to: ["autoriser", "rendre possible", "offrir la possibilité de"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "synonyme",
+    reason: "Variation lexicale : synonyme courant",
+    regex: /\butiliser\b/gi,
+    to: ["employer", "se servir de", "recourir à"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "synonyme",
+    reason: "Variation lexicale : synonyme courant",
+    regex: /\bimportant\b/gi,
+    to: ["essentiel", "majeur", "déterminant", "clé"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "synonyme",
+    reason: "Variation lexicale : synonyme courant",
+    regex: /\baméliorer\b/gi,
+    to: ["optimiser", "perfectionner", "renforcer"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "synonyme",
+    reason: "Variation lexicale : synonyme courant",
+    regex: /\bproblème\b/gi,
+    to: ["difficulté", "enjeu", "obstacle", "défi"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "synonyme",
+    reason: "Variation lexicale : synonyme courant",
+    regex: /\bsolution\b/gi,
+    to: ["réponse", "approche", "remède", "piste"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "synonyme",
+    reason: "Variation lexicale : synonyme courant",
+    regex: /\beffectuer\b/gi,
+    to: ["réaliser", "mener", "accomplir"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "synonyme",
+    reason: "Variation lexicale : synonyme courant",
+    regex: /\bconcernant\b/gi,
+    to: ["au sujet de", "quant à", "pour ce qui est de"],
+    minIntensity: "moderate",
+  },
+
+  // --- Synonymes courants (EN) ---
+  {
+    type: "synonyme",
+    reason: "Lexical variation: common synonym",
+    regex: /\butilize\b/gi,
+    to: ["use", "employ", "apply"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "synonyme",
+    reason: "Lexical variation: common synonym",
+    regex: /\bimplement\b/gi,
+    to: ["put in place", "set up", "introduce"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "synonyme",
+    reason: "Lexical variation: common synonym",
+    regex: /\bsignificant\b/gi,
+    to: ["notable", "substantial", "meaningful"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "synonyme",
+    reason: "Lexical variation: common synonym",
+    regex: /\bfacilitate\b/gi,
+    to: ["help", "enable", "make easier"],
+    minIntensity: "moderate",
+  },
+
+  // --- Transitions supplémentaires (FR) ---
+  {
+    type: "transition",
+    reason: "Variation d'une transition mécanique",
+    regex: /\bPar conséquent,\s*/gi,
+    to: ["Du coup, ", "Résultat : ", "Ce qui fait que "],
+    minIntensity: "light",
+    modes: ["naturel", "personnel"],
+  },
+  {
+    type: "transition",
+    reason: "Variation d'une transition mécanique",
+    regex: /\bNéanmoins,\s*/gi,
+    to: ["Mais ", "Cela dit, ", "Malgré tout, "],
+    minIntensity: "light",
+    modes: ["naturel", "personnel"],
+  },
+  {
+    type: "transition",
+    reason: "Variation d'une transition mécanique",
+    regex: /\bEn outre,\s*/gi,
+    to: ["Et aussi, ", "Sans oublier que ", "Par ailleurs, "],
+    minIntensity: "light",
+    modes: ["naturel", "personnel"],
+  },
+  {
+    type: "transition",
+    reason: "Variation d'une transition mécanique (registre académique)",
+    regex: /\bPar conséquent,\s*/gi,
+    to: ["Il s'ensuit que ", "Cela implique que ", "On en déduit que "],
+    minIntensity: "light",
+    modes: ["academique", "expert"],
+  },
+
+  // --- Incises et variation de longueur (aggressive uniquement) ---
+  {
+    type: "incise",
+    reason: "Ajout d'une incise pour varier le rythme",
+    regex: /\. (Cette|Cette|Ce|Cet) /gi,
+    to: (m: string) => {
+      const incises = [
+        ". Et ça, c'est clé. ",
+        ". Point important : ",
+        ". À noter : ",
+        ". Autrement dit, ",
+      ];
+      // 30% de chance d'insérer une incise
+      if (Math.random() > 0.3) return m;
+      return incises[Math.floor(Math.random() * incises.length)] + m.slice(2).toLowerCase();
+    },
+    minIntensity: "aggressive",
+    modes: ["naturel", "personnel"],
+  },
+  {
+    type: "variation-longueur",
+    reason: "Fusion de deux phrases courtes pour varier le rythme",
+    regex: /([^.!?]{10,40})\. ([A-ZÀ-Ý][^.!?]{10,40})\./g,
+    to: (m: string) => {
+      // 25% de chance de fusionner
+      if (Math.random() > 0.25) return m;
+      const parts = m.match(/([^.!?]{10,40})\. ([A-ZÀ-Ý][^.!?]{10,40})\./);
+      if (!parts) return m;
+      const connectors = [", et ", ", ce qui ", " — "];
+      const connector = connectors[Math.floor(Math.random() * connectors.length)];
+      return parts[1] + connector + parts[2].charAt(0).toLowerCase() + parts[2].slice(1) + ".";
+    },
+    minIntensity: "aggressive",
+  },
 ];
 
 /** Un seul passage de réécriture. Retourne le texte + le journal. */

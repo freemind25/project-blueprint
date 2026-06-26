@@ -13,6 +13,8 @@ export type { HumanizeIntensity, HumanizeMode, HumanizeStats, ChangeLog };
 export type { CleanStats };
 
 const STORAGE_KEY = "unrobot:draft-text";
+const PROFILES_KEY = "unrobot:profiles";
+const ACTIVE_PROFILE_KEY = "unrobot:active-profile";
 const MAX_HISTORY = 5;
 
 export const useTextCleaner = () => {
@@ -32,7 +34,61 @@ export const useTextCleaner = () => {
   const [intensity, setIntensity] = useState<HumanizeIntensity>("moderate");
   const [mode, setMode] = useState<HumanizeMode>("naturel");
   const [untilNatural, setUntilNatural] = useState(false);
-  const [profile, setProfile] = useState<WriterProfile | null>(null);
+  const [profile, setProfile] = useState<WriterProfile | null>(() => {
+    try {
+      const activeId = localStorage.getItem(ACTIVE_PROFILE_KEY);
+      if (!activeId) return null;
+      const profiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
+      return profiles[activeId] ?? null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Profils multiples nommés (Phase 0.3)
+  const [profiles, setProfiles] = useState<Record<string, WriterProfile>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
+    } catch {
+      return {};
+    }
+  });
+
+  // Persistance des profils dans localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+      if (profile) {
+        localStorage.setItem(ACTIVE_PROFILE_KEY, profile.name);
+      } else {
+        localStorage.removeItem(ACTIVE_PROFILE_KEY);
+      }
+    } catch {
+      /* quota / mode privé : on ignore */
+    }
+  }, [profiles, profile]);
+
+  const saveProfile = useCallback((p: WriterProfile) => {
+    setProfiles((prev) => ({ ...prev, [p.name]: p }));
+    setProfile(p);
+  }, []);
+
+  const deleteProfile = useCallback((name: string) => {
+    setProfiles((prev) => {
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+    if (profile?.name === name) setProfile(null);
+  }, [profile]);
+
+  const selectProfile = useCallback((name: string | null) => {
+    if (!name) {
+      setProfile(null);
+      return;
+    }
+    setProfile(profiles[name] ?? null);
+  }, [profiles]);
   // Pile d'historique (jusqu'à MAX_HISTORY versions précédentes) pour "Annuler".
   const [history, setHistory] = useState<string[]>([]);
 
@@ -157,6 +213,10 @@ export const useTextCleaner = () => {
     setUntilNatural,
     profile,
     setProfile,
+    profiles,
+    saveProfile,
+    deleteProfile,
+    selectProfile,
     performClean,
     performHumanize,
     undo,
