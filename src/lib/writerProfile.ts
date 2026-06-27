@@ -3,6 +3,8 @@
  * Analyse des textes de l'utilisateur, produit un profil JSON, et permet
  * une réécriture légère pour rapprocher un texte du style appris. 100% local.
  */
+import { splitSentences } from "./utils";
+import { z } from "zod";
 
 export interface WriterProfile {
   name: string;
@@ -30,10 +32,6 @@ export interface ProfileChange {
 }
 
 const round = (n: number, d = 2) => Math.round(n * 10 ** d) / 10 ** d;
-
-function splitSentences(text: string): string[] {
-  return text.split(/[.!?]+/).map((s) => s.trim()).filter(Boolean);
-}
 
 function words(text: string): string[] {
   return (text.toLowerCase().match(/\b[\wàâäéèêëîïôöùûüç']+\b/gi) || []);
@@ -139,8 +137,25 @@ export function serializeProfile(profile: WriterProfile): string {
   return JSON.stringify(profile, null, 2);
 }
 
+const profileSchema = z.object({
+  name: z.string(),
+  createdAt: z.string(),
+  language: z.enum(["fr", "en", "mixte"]),
+  metrics: z.object({
+    avgSentenceLength: z.number(),
+    sentenceLengthStdDev: z.number(),
+    lexicalDiversity: z.number(),
+    contractionRate: z.number(),
+    commaRate: z.number(),
+    exclamationRate: z.number(),
+    questionRate: z.number(),
+    firstPersonRate: z.number(),
+  }),
+  signaturePhrases: z.array(z.string()),
+  favoriteTransitions: z.array(z.string()),
+}).strict();
+
 export function parseProfile(json: string): WriterProfile {
-  const p = JSON.parse(json);
-  if (!p || typeof p !== "object" || !p.metrics) throw new Error("Profil invalide");
-  return p as WriterProfile;
+  const raw = JSON.parse(json);
+  return profileSchema.parse(raw) as WriterProfile;
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import { downloadBlob, printHTML, escapeHtml } from "@/lib/utils";
 import { ChangeLog } from "@/hooks/useTextCleaner";
 import { Button } from "@/components/ui/button";
 import {
@@ -151,21 +152,10 @@ export const HumanizeLog: React.FC<HumanizeLogProps> = ({ changeLog, summary }) 
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json;charset=utf-8",
     });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "journal_modifications.json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, "journal_modifications.json");
   };
 
-  const escapeHtml = (s: string) =>
-    s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+
 
   const exportPDF = () => {
     const rows = changeLog
@@ -209,11 +199,7 @@ export const HumanizeLog: React.FC<HumanizeLogProps> = ({ changeLog, summary }) 
   <script>window.onload = () => { window.print(); };</script>
 </body></html>`;
 
-    const win = window.open("", "_blank");
-    if (win) {
-      win.document.write(html);
-      win.document.close();
-    }
+    if (!printHTML(html)) return;
   };
 
   return (

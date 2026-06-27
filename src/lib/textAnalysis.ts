@@ -2,6 +2,7 @@
  * Moteur d'analyse IA — 100% local, sans dépendance React ni réseau.
  * Source unique de vérité partagée entre le hook UI, le worker et les tests.
  */
+import { splitSentences } from "./utils";
 
 export interface AIAnalysisResult {
   score: number;
@@ -150,7 +151,7 @@ export function analyzeText(text: string): AIAnalysisResult {
   }
 
   const details: AnalysisDetail[] = [];
-  const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+  const sentences = splitSentences(text);
   const words = text.toLowerCase().match(/\b[\wàâäéèêëîïôöùûüç]+\b/gi) || [];
 
   // 1. Burstiness (variation de longueur des phrases)

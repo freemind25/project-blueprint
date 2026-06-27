@@ -6,16 +6,20 @@
 import { performClean } from "@/lib/cleaner";
 import { performHumanize, type HumanizeOptions } from "@/lib/humanizer";
 
+const VALID_ACTIONS = new Set(["clean", "humanize"]);
+
 self.onmessage = (e: MessageEvent) => {
-  const { action, text, options } = e.data as {
-    action: "clean" | "humanize";
-    text: string;
-    options?: HumanizeOptions;
-  };
+  const data = e.data;
+
+  // Validation minimale des messages entrants
+  if (!data || typeof data !== "object") return;
+  const { action, text } = data as Record<string, unknown>;
+  if (typeof action !== "string" || !VALID_ACTIONS.has(action)) return;
+  if (typeof text !== "string") return;
 
   if (action === "clean") {
     self.postMessage({ action: "clean", result: performClean(text) });
   } else if (action === "humanize") {
-    self.postMessage({ action: "humanize", result: performHumanize(text, options) });
+    self.postMessage({ action: "humanize", result: performHumanize(text, data.options as HumanizeOptions | undefined) });
   }
 };

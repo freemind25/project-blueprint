@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { buildProfile, serializeProfile, parseProfile, type WriterProfile } from "@/lib/writerProfile";
+import { downloadBlob } from "@/lib/utils";
 import { UserPen, Download, Upload, Trash2 } from "lucide-react";
 
 interface WriterProfilePanelProps {
@@ -27,12 +28,7 @@ export const WriterProfilePanel: React.FC<WriterProfilePanelProps> = ({ profile,
   const handleExport = () => {
     if (!profile) return;
     const blob = new Blob([serializeProfile(profile)], { type: "application/json;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "profil-stylistique.json";
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, "profil-stylistique.json");
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {

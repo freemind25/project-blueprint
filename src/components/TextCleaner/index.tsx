@@ -16,6 +16,7 @@ import { EXAMPLE_TEXTS } from "@/data/exampleTexts";
 import { Button } from "@/components/ui/button";
 import { FileText, FileJson, FileDown } from "lucide-react";
 import { downloadReportJSON, downloadReportPDF } from "@/lib/report";
+import { downloadBlob } from "@/lib/utils";
 
 export const TextCleaner: React.FC = () => {
   const {
@@ -76,14 +77,7 @@ export const TextCleaner: React.FC = () => {
   const handleDownload = useCallback(() => {
     if (!hasText) return;
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "texte-unrobot.txt";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, "texte-unrobot.txt");
     toast.success("Fichier téléchargé");
   }, [text, hasText]);
 

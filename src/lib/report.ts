@@ -1,6 +1,7 @@
 import type { AIAnalysisResult } from "./textAnalysis";
 import type { HumanizeStats } from "./humanizer";
 import { toast } from "sonner";
+import { escapeHtml, downloadBlob, printHTML } from "./utils";
 
 export interface ReportData {
   generatedAt: string;
@@ -9,25 +10,15 @@ export interface ReportData {
   humanize: HumanizeStats | null;
 }
 
-function triggerDownload(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
+
 
 /** Rapport JSON téléchargeable, 100% local. */
 export function downloadReportJSON(data: ReportData) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
-  triggerDownload(blob, `rapport-unrobot-${Date.now()}.json`);
+  downloadBlob(blob, `rapport-unrobot-${Date.now()}.json`);
 }
 
-const esc = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
 
 /** Rapport PDF local via la fenêtre d'impression du navigateur (aucune dépendance, aucun réseau). */
 export function downloadReportPDF(data: ReportData) {
@@ -64,25 +55,21 @@ export function downloadReportPDF(data: ReportData) {
 <div class="muted">Généré le ${new Date(data.generatedAt).toLocaleString("fr-FR")} - Traitement 100% local</div>
 ${a ? `<h2>Scores</h2><table>${rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("")}</table>` : ""}
 ${h ? `<h2>Humanisation</h2><table>
-  <tr><td>Mode</td><td>${esc(h.mode)}</td></tr>
-  <tr><td>Intensité</td><td>${esc(h.intensity)}</td></tr>
+  <tr><td>Mode</td><td>${escapeHtml(h.mode)}</td></tr>
+  <tr><td>Intensité</td><td>${escapeHtml(h.intensity)}</td></tr>
   <tr><td>Passes</td><td>${h.passes}</td></tr>
   <tr><td>Modifications</td><td>${h.modificationsCount}</td></tr>
   <tr><td>Score avant -> après</td><td>${h.scoreBefore}% -> ${h.scoreAfter}%</td></tr>
 </table>` : ""}
-${a && a.details.length ? `<h2>Problèmes détectés</h2><ul>${a.details.map((d) => `<li><strong>${esc(d.category)}</strong> : ${esc(d.issue)}</li>`).join("")}</ul>` : ""}
+${a && a.details.length ? `<h2>Problèmes détectés</h2><ul>${a.details.map((d) => `<li><strong>${escapeHtml(d.category)}</strong> : ${escapeHtml(d.issue)}</li>`).join("")}</ul>` : ""}
 <h2>Texte analysé</h2>
-<div class="text">${esc(data.text)}</div>
+<div class="text">${escapeHtml(data.text)}</div>
 <script>window.onload=function(){window.print();}</script>
 </body></html>`;
 
-  const w = window.open("", "_blank");
-  if (!w) {
+  if (!printHTML(html)) {
     toast.error("Veuillez autoriser les fenêtres popups pour générer le rapport PDF");
     return;
   }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
   toast.success("Rapport PDF prêt à imprimer/enregistrer");
 }
