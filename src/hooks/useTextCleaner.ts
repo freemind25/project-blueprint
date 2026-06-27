@@ -14,6 +14,8 @@ export type { CleanStats };
 
 const STORAGE_KEY = "unrobot:draft-text";
 const MAX_HISTORY = 5;
+const NATURAL_SCORE_THRESHOLD = 30;
+const DEFAULT_MAX_PASSES = 5;
 
 export const useTextCleaner = () => {
   const [text, setText] = useState(() => {
@@ -39,7 +41,16 @@ export const useTextCleaner = () => {
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    workerRef.current = new Worker(new URL("../workers/textProcessor.worker.ts", import.meta.url), { type: "module" });
+    try {
+      workerRef.current = new Worker(
+        new URL("../workers/textProcessor.worker.ts", import.meta.url),
+        { type: "module" }
+      );
+    } catch (err) {
+      console.error("Impossible de créer le Web Worker :", err);
+      toast.error("Le moteur de traitement n'a pas pu démarrer. Réessayez en rafraîchissant la page.");
+      return;
+    }
 
     workerRef.current.onmessage = (e) => {
       const { action, result } = e.data;
@@ -48,11 +59,13 @@ export const useTextCleaner = () => {
         setStats(result.stats);
         setIsCleaned(true);
         setIsProcessing(false);
+        toast.success("Nettoyage terminé");
       } else if (action === "humanize") {
         setText(result.humanizedText);
         setHumanizeStats(result);
         setIsHumanized(true);
         setIsHumanizing(false);
+        toast.success(`Humanisation terminée — ${result.modificationsCount} modification${result.modificationsCount > 1 ? "s" : ""}`);
       }
     };
 
@@ -100,26 +113,27 @@ export const useTextCleaner = () => {
       options: {
         intensity,
         mode,
-        // "Humanize until natural" : on vise un score IA <= 30%.
-        targetScore: untilNatural ? 30 : undefined,
-        maxPasses: 6,
+        targetScore: untilNatural ? NATURAL_SCORE_THRESHOLD : undefined,
+        maxPasses: DEFAULT_MAX_PASSES,
         profile,
       },
     });
   }, [text, intensity, mode, untilNatural, profile, pushHistory]);
 
+  const historyRef = useRef<string[]>(history);
+  historyRef.current = history;
+
   const undo = useCallback(() => {
-    setHistory((prev) => {
-      if (prev.length === 0) return prev;
-      const previous = prev[prev.length - 1];
-      setText(previous);
-      setIsCleaned(false);
-      setIsHumanized(false);
-      setStats(null);
-      setHumanizeStats(null);
-      toast.success("Version précédente restaurée");
-      return prev.slice(0, -1);
-    });
+    const prev = historyRef.current;
+    if (prev.length === 0) return;
+    const previous = prev[prev.length - 1];
+    setHistory((h) => h.slice(0, -1));
+    setText(previous);
+    setIsCleaned(false);
+    setIsHumanized(false);
+    setStats(null);
+    setHumanizeStats(null);
+    toast.success("Version précédente restaurée");
   }, []);
 
   const clearAll = useCallback(() => {

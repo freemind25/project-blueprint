@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { useTextCleaner } from "@/hooks/useTextCleaner";
 import { useAIDetector, AIAnalysisResult } from "@/hooks/useAIDetector";
+import { MIN_ANALYSIS_LENGTH } from "@/lib/textAnalysis";
 import { Header } from "./Header";
 import { TextEditor } from "./TextEditor";
 import { FileDropZone } from "./FileDropZone";
@@ -84,6 +85,7 @@ export const TextCleaner: React.FC = () => {
   const handleClear = useCallback(() => {
     clearAll();
     setAnalysis(null);
+    toast.success("Texte effacé");
   }, [clearAll]);
 
   const handleFileLoad = useCallback(
@@ -108,7 +110,7 @@ export const TextCleaner: React.FC = () => {
 
   // Analyse en arrière-plan (mise à jour discrète du score)
   useEffect(() => {
-    if (!text || text.length < 50) return;
+    if (!text || text.length < MIN_ANALYSIS_LENGTH) return;
     const win = window as unknown as {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
       cancelIdleCallback?: (id: number) => void;
@@ -180,9 +182,7 @@ export const TextCleaner: React.FC = () => {
 
       {stats && (
         <CleaningStats
-          nbspCount={stats.nbspCount}
-          narrowNbspCount={stats.narrowNbspCount}
-          totalCleaned={stats.totalCleaned}
+          stats={stats}
           isVisible={isCleaned}
         />
       )}

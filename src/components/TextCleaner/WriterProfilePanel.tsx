@@ -48,6 +48,8 @@ export const WriterProfilePanel: React.FC<WriterProfilePanelProps> = ({ profile,
     <div className="space-y-3 p-4 rounded-lg border border-border bg-card/50">
       <button
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls="writer-profile-panel"
         className="flex w-full items-center justify-between text-sm font-medium"
       >
         <span className="flex items-center gap-2">
@@ -59,7 +61,7 @@ export const WriterProfilePanel: React.FC<WriterProfilePanelProps> = ({ profile,
       </button>
 
       {open && (
-        <div className="space-y-3">
+        <div id="writer-profile-panel" className="space-y-3">
           <p className="text-xs text-muted-foreground">
             Collez un de vos textes pour créer un profil stylistique local (JSON). Il sert à réécrire dans votre style.
           </p>

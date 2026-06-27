@@ -162,7 +162,12 @@
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar (all browsers) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) hsl(var(--muted));
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -182,11 +187,7 @@
   background: hsl(var(--muted-foreground) / 0.5);
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* Animations — fadeIn defined in tailwind.config.ts as `fade-in` */
 
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; }
@@ -203,9 +204,7 @@
   50% { transform: scale(1.2); opacity: 0.8; }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
-}
+/* animate-fade-in uses the `fade-in` keyframe from tailwind.config.ts */
 
 .animate-pulse-soft {
   animation: pulse-soft 2s ease-in-out infinite;
@@ -224,4 +223,13 @@
 
 .animate-sparkle {
   animation: sparkle 0.6s ease-in-out;
+}
+
+/* Print styles */
+@media print {
+  body { background: white !important; color: black !important; }
+  .animate-fade-in, .animate-pulse-soft, .animate-shimmer, .animate-sparkle {
+    animation: none !important;
+  }
+  button, [role="toolbar"], .sonner-toaster { display: none !important; }
 }

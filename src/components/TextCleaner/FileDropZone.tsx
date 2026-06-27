@@ -75,6 +75,8 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({ onFileLoad, onError 
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      role="region"
+      aria-label="Zone de dépôt de fichier texte"
     >
       <input
         type="file"

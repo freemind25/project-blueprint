@@ -13,6 +13,17 @@ describe("cleaner", () => {
     expect(cleanedText).toBe("a b c");
     expect(stats.totalCleaned).toBe(2);
   });
+  it("removes zero-width characters", () => {
+    const { cleanedText, stats } = performClean("hello\u200Bworld\u200C");
+    expect(cleanedText).toBe("hello world ");
+    expect(stats.zeroWidthCount).toBe(2);
+    expect(stats.totalCleaned).toBe(2);
+  });
+  it("removes BOM and bidi marks", () => {
+    const { stats } = performClean("\uFEFFtext\u200E\u200F");
+    expect(stats.bomCount).toBe(1);
+    expect(stats.bidiCount).toBe(2);
+  });
 });
 
 describe("analyzeText", () => {

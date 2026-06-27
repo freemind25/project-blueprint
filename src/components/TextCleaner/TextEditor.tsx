@@ -35,6 +35,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         readOnly={readOnly}
+        aria-label="Zone de saisie de texte"
         className={cn(
           "w-full min-h-[300px] p-6 rounded-2xl resize-none",
           "bg-card border border-border",

@@ -1,46 +1,57 @@
 import React from "react";
 import { AIAnalysisResult } from "@/hooks/useAIDetector";
 import { AlertTriangle, CheckCircle, XCircle, Bot, Brain, Sparkles, MessageSquare, Gauge, BookOpen, Layers, Wand2, Check, X } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AIAnalysisProps {
   result: AIAnalysisResult | null;
   isAnalyzing: boolean;
 }
 
-const getScoreLabel = (score: number): { label: string; color: string; icon: React.ReactNode } => {
+const getScoreLabel = (score: number): { label: string; color: string; bgColor: string; icon: React.ReactNode } => {
   if (score < 30) {
-    return { 
-      label: "Probablement humain", 
-      color: "text-green-500", 
-      icon: <CheckCircle className="w-5 h-5 text-green-500" /> 
+    return {
+      label: "Probablement humain",
+      color: "text-success",
+      bgColor: "bg-success",
+      icon: <CheckCircle className="w-5 h-5 text-success" />,
     };
   }
   if (score < 60) {
-    return { 
-      label: "Mixte / Incertain", 
-      color: "text-yellow-500", 
-      icon: <AlertTriangle className="w-5 h-5 text-yellow-500" /> 
+    return {
+      label: "Mixte / Incertain",
+      color: "text-warning",
+      bgColor: "bg-warning",
+      icon: <AlertTriangle className="w-5 h-5 text-warning" />,
     };
   }
-  return { 
-    label: "Probablement IA", 
-    color: "text-red-500", 
-    icon: <XCircle className="w-5 h-5 text-red-500" /> 
+  return {
+    label: "Probablement IA",
+    color: "text-destructive",
+    bgColor: "bg-destructive",
+    icon: <XCircle className="w-5 h-5 text-destructive" />,
   };
 };
 
 const getProgressColor = (score: number): string => {
-  if (score < 30) return "bg-green-500";
-  if (score < 60) return "bg-yellow-500";
-  return "bg-red-500";
+  if (score < 30) return "bg-success";
+  if (score < 60) return "bg-warning";
+  return "bg-destructive";
 };
 
 const getSeverityColor = (severity: "low" | "medium" | "high"): string => {
   switch (severity) {
-    case "low": return "border-green-500/30 bg-green-500/10";
-    case "medium": return "border-yellow-500/30 bg-yellow-500/10";
-    case "high": return "border-red-500/30 bg-red-500/10";
+    case "low": return "border-success/30 bg-success/10";
+    case "medium": return "border-warning/30 bg-warning/10";
+    case "high": return "border-destructive/30 bg-destructive/10";
+  }
+};
+
+const getSeverityIconColor = (severity: "low" | "medium" | "high"): string => {
+  switch (severity) {
+    case "low": return "text-success";
+    case "medium": return "text-warning";
+    case "high": return "text-destructive";
   }
 };
 
@@ -54,7 +65,7 @@ const ScoreBar: React.FC<{ label: string; score: number; icon: React.ReactNode }
       <span className="font-medium">{score}%</span>
     </div>
     <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-      <div 
+      <div
         className={`h-full transition-all duration-500 ${getProgressColor(score)}`}
         style={{ width: `${score}%` }}
       />
@@ -62,26 +73,43 @@ const ScoreBar: React.FC<{ label: string; score: number; icon: React.ReactNode }
   </div>
 );
 
+const AnalysisSkeleton: React.FC = () => (
+  <div className="space-y-4 p-6 rounded-lg border border-border bg-card/80">
+    <div className="flex items-center gap-3">
+      <Skeleton className="w-5 h-5 rounded-full" />
+      <Skeleton className="h-5 w-40" />
+      <div className="ml-auto">
+        <Skeleton className="h-8 w-16" />
+      </div>
+    </div>
+    <Skeleton className="h-2 w-full rounded-full" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+      {Array.from({ length: 7 }).map((_, i) => (
+        <div key={i} className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-3 w-8" />
+          </div>
+          <Skeleton className="h-1.5 w-full rounded-full" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing }) => {
   if (isAnalyzing) {
-    return (
-      <div className="p-6 rounded-lg border border-border bg-card animate-pulse">
-        <div className="flex items-center gap-3">
-          <Bot className="w-5 h-5 text-muted-foreground animate-spin" />
-          <span className="text-sm text-muted-foreground">Analyse en cours...</span>
-        </div>
-      </div>
-    );
+    return <AnalysisSkeleton />;
   }
 
   if (!result || result.score === 0) {
     return null;
   }
 
-  const { label, color, icon } = getScoreLabel(result.score);
+  const { label, color, bgColor, icon } = getScoreLabel(result.score);
 
   return (
-    <div className="space-y-4 p-6 rounded-lg border border-border bg-card/80 animate-fade-in">
+    <div className="space-y-4 p-6 rounded-lg border border-border bg-card/80 animate-fade-in" role="region" aria-label="Résultats de l'analyse IA" aria-live="polite">
       {/* Main score */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -99,55 +127,27 @@ export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing }) =
 
       {/* Overall progress */}
       <div className="h-2 bg-secondary rounded-full overflow-hidden">
-        <div 
-          className={`h-full transition-all duration-700 ${getProgressColor(result.score)}`}
+        <div
+          className={`h-full transition-all duration-700 ${bgColor}`}
           style={{ width: `${result.score}%` }}
         />
       </div>
 
       {/* Detailed scores */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-        <ScoreBar 
-          label="Burstiness" 
-          score={result.burstinessScore} 
-          icon={<Gauge className="w-3 h-3" />} 
-        />
-        <ScoreBar 
-          label="Transitions" 
-          score={result.transitionScore} 
-          icon={<MessageSquare className="w-3 h-3" />} 
-        />
-        <ScoreBar 
-          label="Perfection" 
-          score={result.perfectionScore} 
-          icon={<Sparkles className="w-3 h-3" />} 
-        />
-        <ScoreBar 
-          label="Voix générique" 
-          score={result.voiceScore} 
-          icon={<Bot className="w-3 h-3" />} 
-        />
-        <ScoreBar 
-          label="Perplexité" 
-          score={result.perplexityScore} 
-          icon={<Brain className="w-3 h-3" />} 
-        />
-        <ScoreBar 
-          label="Vocabulaire" 
-          score={result.vocabularyScore} 
-          icon={<BookOpen className="w-3 h-3" />} 
-        />
-        <ScoreBar 
-          label="Profondeur" 
-          score={result.depthScore} 
-          icon={<Layers className="w-3 h-3" />} 
-        />
+        <ScoreBar label="Burstiness" score={result.burstinessScore} icon={<Gauge className="w-3 h-3" />} />
+        <ScoreBar label="Transitions" score={result.transitionScore} icon={<MessageSquare className="w-3 h-3" />} />
+        <ScoreBar label="Perfection" score={result.perfectionScore} icon={<Sparkles className="w-3 h-3" />} />
+        <ScoreBar label="Voix générique" score={result.voiceScore} icon={<Bot className="w-3 h-3" />} />
+        <ScoreBar label="Perplexité" score={result.perplexityScore} icon={<Brain className="w-3 h-3" />} />
+        <ScoreBar label="Vocabulaire" score={result.vocabularyScore} icon={<BookOpen className="w-3 h-3" />} />
+        <ScoreBar label="Profondeur" score={result.depthScore} icon={<Layers className="w-3 h-3" />} />
       </div>
 
       {/* Humanization & SUCKS overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
         <div className="p-3 rounded-md border border-border bg-background/40 text-center">
-          <div className="text-2xl font-bold text-green-500">{result.humanizationScore}%</div>
+          <div className="text-2xl font-bold text-success">{result.humanizationScore}%</div>
           <p className="text-xs text-muted-foreground">Score d'humanisation</p>
         </div>
         <div className="p-3 rounded-md border border-border bg-background/40 text-center">
@@ -168,9 +168,9 @@ export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing }) =
             {result.checklist.map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-xs">
                 {item.passed ? (
-                  <Check className="w-4 h-4 text-green-500 flex-shrink-0" aria-label="Réussi" />
+                  <Check className="w-4 h-4 text-success flex-shrink-0" aria-label="Réussi" />
                 ) : (
-                  <X className="w-4 h-4 text-red-500 flex-shrink-0" aria-label="Échoué" />
+                  <X className="w-4 h-4 text-destructive flex-shrink-0" aria-label="Échoué" />
                 )}
                 <span className={item.passed ? "text-muted-foreground" : "text-foreground"}>{item.label}</span>
               </div>
@@ -185,22 +185,19 @@ export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing }) =
           <h4 className="text-sm font-medium text-muted-foreground">Problèmes détectés</h4>
           <div className="space-y-2">
             {result.details.map((detail, index) => (
-              <div 
+              <div
                 key={index}
                 className={`p-3 rounded-md border ${getSeverityColor(detail.severity)}`}
               >
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                    detail.severity === "high" ? "text-red-500" : 
-                    detail.severity === "medium" ? "text-yellow-500" : "text-green-500"
-                  }`} />
+                  <AlertTriangle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${getSeverityIconColor(detail.severity)}`} />
                   <div className="space-y-1">
                     <p className="text-sm font-medium">{detail.category}</p>
                     <p className="text-xs text-muted-foreground">{detail.issue}</p>
                     {detail.examples && detail.examples.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1">
                         {detail.examples.map((example, i) => (
-                          <span 
+                          <span
                             key={i}
                             className="text-xs px-1.5 py-0.5 rounded bg-background/50 text-muted-foreground"
                           >

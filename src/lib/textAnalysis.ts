@@ -44,6 +44,39 @@ interface PatternDef {
   suggestion: string;
 }
 
+/** Longueur minimale (caractères) pour lancer une analyse significative. */
+export const MIN_ANALYSIS_LENGTH = 50;
+
+/** Pondérations des sous-scores dans le score global. */
+const SCORE_WEIGHTS = {
+  burstiness: 0.2,
+  transition: 0.15,
+  perfection: 0.15,
+  voice: 0.2,
+  perplexity: 0.1,
+  vocabulary: 0.1,
+  depth: 0.1,
+  maxPatternPoints: 40,
+} as const;
+
+/** Multiplicateurs de normalisation pour chaque sous-score. */
+const MULTIPLIERS = {
+  transition: 600,
+  perfection: 220,
+  voice: 350,
+  perplexity: 1.8,
+  depth: 900,
+} as const;
+
+/** Pondérations et seuils du score SUCKS. */
+const SUCKS_CONFIG = {
+  specific:   { weight: 0.6, bonus: 25, threshold: 3, field: "depth" as const },
+  unique:     { weight: 0.7, penalty: 25, flag: "Langage vague" as const, field: "voice" as const },
+  clear:      { weight: 0.5, penalty: 25, flag: "Jargon corporate" as const, field: "transition" as const },
+  simple:     { weight: 0.4, penalty: 25, avgLengthThreshold: 25, field: "vocabulary" as const },
+  sticky:     { weight: 0.5, penalty: 20, flag: "Phrases rhétoriques interdites" as const, field: "perfection" as const },
+} as const;
+
 // Anti-AI Writing Engine : motifs textuels typiques de l'IA (FR + EN), 100% local.
 export const AI_PATTERNS: PatternDef[] = [
   {
@@ -132,7 +165,7 @@ const detectStaccato = (sentences: string[]): number => {
 
 /** Analyse complète d'un texte. Pure, déterministe (hors aléatoire : aucun). */
 export function analyzeText(text: string): AIAnalysisResult {
-  if (!text || text.length < 50) {
+  if (!text || text.length < MIN_ANALYSIS_LENGTH) {
     return {
       score: 0,
       perplexityScore: 0,
@@ -152,7 +185,8 @@ export function analyzeText(text: string): AIAnalysisResult {
 
   const details: AnalysisDetail[] = [];
   const sentences = splitSentences(text);
-  const words = text.toLowerCase().match(/\b[\wàâäéèêëîïôöùûüç]+\b/gi) || [];
+  // Inclut les majuscules accentuées (À, É, È, Ô, etc.)
+  const words = text.toLowerCase().match(/\b[\wàâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ]+\b/gi) || [];
 
   // 1. Burstiness (variation de longueur des phrases)
   const sentenceLengths = sentences.map((s) => s.trim().split(/\s+/).length);
@@ -185,7 +219,7 @@ export function analyzeText(text: string): AIAnalysisResult {
     if (m.length) transFound.push(t);
     transCount += m.length;
   });
-  const transitionScore = clamp((transCount / Math.max(1, words.length)) * 600);
+  const transitionScore = clamp((transCount / Math.max(1, words.length)) * MULTIPLIERS.transition);
   if (transitionScore > 45) {
     details.push({ category: "Transitions", issue: "Connecteurs logiques trop fréquents", severity: "medium", examples: transFound.slice(0, 6) });
   }
@@ -194,7 +228,7 @@ export function analyzeText(text: string): AIAnalysisResult {
   const informalMarkers = (text.match(/\b(bah|ben|du coup|genre|truc|ouais|franchement|carrément)\b/gi) || []).length;
   const ellipsis = (text.match(/\.\.\.|…/g) || []).length;
   const informalDensity = (informalMarkers + ellipsis) / Math.max(1, sentences.length);
-  const perfectionScore = clamp(100 - informalDensity * 220);
+  const perfectionScore = clamp(100 - informalDensity * MULTIPLIERS.perfection);
   if (perfectionScore > 80) {
     details.push({ category: "Perfection", issue: "Style trop lisse, aucune marque d'oralité", severity: "low" });
   }
@@ -213,7 +247,7 @@ export function analyzeText(text: string): AIAnalysisResult {
     if (m.length) genericFound.push(p);
     genericCount += m.length;
   });
-  const voiceScore = clamp((genericCount / Math.max(1, sentences.length)) * 350);
+  const voiceScore = clamp((genericCount / Math.max(1, sentences.length)) * MULTIPLIERS.voice);
   if (voiceScore > 40) {
     details.push({ category: "Voix générique", issue: "Formulations passe-partout caractéristiques de l'IA", severity: "high", examples: genericFound.slice(0, 6) });
   }
@@ -225,13 +259,13 @@ export function analyzeText(text: string): AIAnalysisResult {
   ]);
   const commonCount = words.filter((w) => commonWords.has(w)).length;
   const commonRatio = (commonCount / Math.max(1, words.length)) * 100;
-  const perplexityScore = clamp(commonRatio * 1.8);
+  const perplexityScore = clamp(commonRatio * MULTIPLIERS.perplexity);
 
   // 7. Profondeur (détails concrets : chiffres, noms propres)
   const digits = (text.match(/\d/g) || []).length;
   const properNouns = (text.match(/(?<=\s)[A-ZÀ-Ý][a-zà-ÿ]{2,}/g) || []).length;
   const concreteDensity = (digits + properNouns) / Math.max(1, words.length);
-  const depthScore = clamp(100 - concreteDensity * 900);
+  const depthScore = clamp(100 - concreteDensity * MULTIPLIERS.depth);
   if (depthScore > 85) {
     details.push({ category: "Profondeur", issue: "Peu de détails concrets (chiffres, noms, exemples)", severity: "low" });
   }
@@ -269,25 +303,27 @@ export function analyzeText(text: string): AIAnalysisResult {
     });
   }
 
+  const W = SCORE_WEIGHTS;
   const score = clamp(
-    burstinessScore * 0.2 +
-      transitionScore * 0.15 +
-      perfectionScore * 0.15 +
-      voiceScore * 0.2 +
-      perplexityScore * 0.1 +
-      vocabularyScore * 0.1 +
-      depthScore * 0.1 +
-      Math.min(40, patternPoints)
+    burstinessScore * W.burstiness +
+      transitionScore * W.transition +
+      perfectionScore * W.perfection +
+      voiceScore * W.voice +
+      perplexityScore * W.perplexity +
+      vocabularyScore * W.vocabulary +
+      depthScore * W.depth +
+      Math.min(W.maxPatternPoints, patternPoints)
   );
 
   const humanizationScore = clamp(100 - score);
 
   // Score SUCKS (Specific, Unique, Clear, Simple, Sticky) — heuristique locale 0-100.
-  const specific = clamp(100 - depthScore * 0.6 + (digits + properNouns > 3 ? 20 : 0));
-  const unique = clamp(100 - voiceScore * 0.7 - (patternHits["Langage vague"] ? 25 : 0));
-  const clear = clamp(100 - transitionScore * 0.5 - (patternHits["Jargon corporate"] ? 25 : 0));
-  const simple = clamp(100 - vocabularyScore * 0.4 - (avgLength > 25 ? 25 : 0));
-  const sticky = clamp(100 - perfectionScore * 0.5 - (patternHits["Phrases rhétoriques interdites"] ? 20 : 0));
+  const S = SUCKS_CONFIG;
+  const specific = clamp(100 - depthScore * S.specific.weight + (digits + properNouns > S.specific.threshold ? S.specific.bonus : 0));
+  const unique = clamp(100 - voiceScore * S.unique.weight - (patternHits[S.unique.flag] ? S.unique.penalty : 0));
+  const clear = clamp(100 - transitionScore * S.clear.weight - (patternHits[S.clear.flag] ? S.clear.penalty : 0));
+  const simple = clamp(100 - vocabularyScore * S.simple.weight - (avgLength > S.simple.avgLengthThreshold ? S.simple.penalty : 0));
+  const sticky = clamp(100 - perfectionScore * S.sticky.weight - (patternHits[S.sticky.flag] ? S.sticky.penalty : 0));
   const sucksScore = clamp((specific + unique + clear + simple + sticky) / 5);
 
   const checklist: ChecklistItem[] = [

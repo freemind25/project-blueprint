@@ -81,6 +81,7 @@ export const IntensitySlider: React.FC<IntensitySliderProps> = ({ value, onChang
           <button
             key={level.value}
             onClick={() => onChange(level.value)}
+            aria-pressed={value === level.value}
             className={`transition-colors hover:text-foreground ${
               value === level.value ? "text-primary font-medium" : ""
             }`}

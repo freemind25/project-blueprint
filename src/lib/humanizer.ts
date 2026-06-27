@@ -112,13 +112,8 @@ const RULES: Rule[] = [
     to: "get people paying attention",
     minIntensity: "moderate",
   },
-  {
-    type: "vague",
-    reason: "Affirmation vague signalée",
-    regex: /\b(many people think|beaucoup de gens pensent)\b/gi,
-    to: (m) => m,
-    minIntensity: "moderate",
-  },
+  // Note: les affirmations vagues sont détectées par textAnalysis.ts
+  // mais ne sont pas modifiées automatiquement (signal only).
 
   // --- Transitions : variation selon le mode ---
   {
@@ -189,10 +184,11 @@ function rewritePass(text: string, intensity: HumanizeIntensity, mode: HumanizeM
   }
 
   // Nettoyage des espaces résiduels après suppressions.
-  result = result.replace(/\s{2,}/g, " ").replace(/\s+([.,;:!?])/g, "$1").replace(/^\s+/gm, (m) => m);
-  // Recapitalisation en début de phrase.
-  result = result.replace(/([.!?]\s+)([a-zà-ÿ])/g, (_m, p1, p2) => p1 + p2.toUpperCase());
-  result = result.replace(/^([a-zà-ÿ])/, (_m, c) => c.toUpperCase());
+  result = result.replace(/\s{2,}/g, " ").replace(/\s+([.,;:!?])/g, "$1");
+  // Recapitalisation en début de phrase et après un saut de paragraphe.
+  result = result.replace(/([.!?]\s+)([a-zà-ÿÀ-Ý])/g, (_m, p1, p2) => p1 + p2.toUpperCase());
+  result = result.replace(/(\n\n+\s*)([a-zà-ÿÀ-Ý])/g, (_m, p1, p2) => p1 + p2.toUpperCase());
+  result = result.replace(/^([a-zà-ÿÀ-Ý])/, (_m, c) => c.toUpperCase());
 
   return { text: result, changeLog };
 }

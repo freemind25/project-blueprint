@@ -29,11 +29,13 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
   return (
     <div className="space-y-3 p-4 rounded-lg border border-border bg-card/50">
       <span className="text-sm font-medium">Mode de réécriture</span>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Mode de réécriture">
         {MODES.map((m) => (
           <button
             key={m.value}
             onClick={() => onModeChange(m.value)}
+            role="radio"
+            aria-checked={mode === m.value}
             className={cn(
               "px-3 py-1.5 rounded-md text-xs font-medium border transition-colors",
               mode === m.value

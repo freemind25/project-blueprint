@@ -1,21 +1,27 @@
 import React from "react";
-import { CheckCircle2, Sparkles, FileText } from "lucide-react";
+import { CheckCircle2, Sparkles, FileText, Eye, Flag, Eraser } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { CleanStats } from "@/lib/cleaner";
 
 interface CleaningStatsProps {
-  nbspCount: number;
-  narrowNbspCount: number;
-  totalCleaned: number;
+  stats: CleanStats;
   isVisible: boolean;
 }
 
-export const CleaningStats: React.FC<CleaningStatsProps> = ({
-  nbspCount,
-  narrowNbspCount,
-  totalCleaned,
-  isVisible,
-}) => {
+const STAT_ITEMS: { key: keyof CleanStats; label: string; icon: React.ReactNode; color: "primary" | "accent" | "success" }[] = [
+  { key: "nbspCount", label: "Espaces insécables (U+00A0)", icon: <FileText className="w-4 h-4" />, color: "primary" },
+  { key: "narrowNbspCount", label: "Espaces minces (U+202F)", icon: <FileText className="w-4 h-4" />, color: "accent" },
+  { key: "zeroWidthCount", label: "Caractères largeur zéro", icon: <Eye className="w-4 h-4" />, color: "accent" },
+  { key: "bidiCount", label: "Marques directionnelles", icon: <Flag className="w-4 h-4" />, color: "accent" },
+  { key: "bomCount", label: "BOM (U+FEFF)", icon: <Eraser className="w-4 h-4" />, color: "accent" },
+  { key: "otherInvisibleCount", label: "Autres invisibles", icon: <Eraser className="w-4 h-4" />, color: "accent" },
+];
+
+export const CleaningStats: React.FC<CleaningStatsProps> = ({ stats, isVisible }) => {
   if (!isVisible) return null;
+
+  const activeItems = STAT_ITEMS.filter((item) => (stats[item.key] as number) > 0);
+  const hasMultipleTypes = activeItems.length > 1;
 
   return (
     <div className="animate-fade-in">
@@ -25,27 +31,30 @@ export const CleaningStats: React.FC<CleaningStatsProps> = ({
         </div>
         <h3 className="text-lg font-semibold text-foreground">Nettoyage terminé</h3>
       </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard
-          icon={<FileText className="w-4 h-4" />}
-          label="Espaces insécables (U+00A0)"
-          value={nbspCount}
-          color="primary"
-        />
-        <StatCard
-          icon={<FileText className="w-4 h-4" />}
-          label="Espaces minces (U+202F)"
-          value={narrowNbspCount}
-          color="accent"
-        />
-        <StatCard
-          icon={<CheckCircle2 className="w-4 h-4" />}
-          label="Total remplacés"
-          value={totalCleaned}
-          color="success"
-          highlight
-        />
+
+      <div className={cn(
+        "grid gap-4",
+        hasMultipleTypes ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"
+      )}>
+        {activeItems.map((item) => (
+          <StatCard
+            key={item.key}
+            icon={item.icon}
+            label={item.label}
+            value={stats[item.key] as number}
+            color={item.color}
+          />
+        ))}
+
+        {stats.totalCleaned > 0 && (
+          <StatCard
+            icon={<CheckCircle2 className="w-4 h-4" />}
+            label="Total remplacés"
+            value={stats.totalCleaned}
+            color="success"
+            highlight
+          />
+        )}
       </div>
     </div>
   );

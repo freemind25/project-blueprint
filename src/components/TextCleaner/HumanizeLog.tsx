@@ -245,6 +245,8 @@ export const HumanizeLog: React.FC<HumanizeLogProps> = ({ changeLog, summary }) 
             >
               <button
                 onClick={() => toggle(type)}
+                aria-expanded={isOpen}
+                aria-controls={`humanize-log-${type}`}
                 className="w-full flex items-center justify-between p-3 hover:bg-accent/50 transition-colors"
               >
                 <div className="flex items-center gap-2.5">
@@ -262,7 +264,7 @@ export const HumanizeLog: React.FC<HumanizeLogProps> = ({ changeLog, summary }) 
               </button>
 
               {isOpen && (
-                <div className="px-3 pb-3 space-y-2">
+                <div id={`humanize-log-${type}`} className="px-3 pb-3 space-y-2">
                   {changes.map((change, i) => (
                     <div
                       key={i}
