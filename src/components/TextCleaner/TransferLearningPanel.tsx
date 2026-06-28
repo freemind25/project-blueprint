@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { toast } from "sonner";
 import {
-  trainCustomModel, loadModelsFromIDB, deleteModelFromIDB, saveDatasetToIDB,
-  loadDatasetFromIDB, listDatasetsFromIDB,
+  trainCustomModel, loadModelsFromIDB, deleteModelFromIDB, saveModelToIDB,
+  saveDatasetToIDB, loadDatasetFromIDB, listDatasetsFromIDB,
   type LabeledText, type TrainingProgress, type CustomModel, DEFAULT_TRAINING_CONFIG,
 } from "@/lib/transfer";
 import { Brain, Play, Square, Trash2, Download, Upload, Check, X, Loader2, Cpu, Save, FolderOpen } from "lucide-react";
@@ -117,7 +117,7 @@ export const TransferLearningPanel: React.FC<TransferLearningPanelProps> = ({ on
             <Brain className="w-5 h-5 text-primary" />
             <div>
               <h3 className="font-semibold">Modèle personnalisé</h3>
-              <p className="text-xs text-muted-foreground">Transfer Learning in-browser · TensorFlow.js</p>
+              <p className="text-xs text-muted-foreground">Transfer Learning in-browser · Pur JavaScript</p>
             </div>
           </div>
           {activeModel && (

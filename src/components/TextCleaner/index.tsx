@@ -16,12 +16,14 @@ import { AIAnalysis } from "./AIAnalysis";
 import { ModeSelector } from "./ModeSelector";
 import { WriterProfilePanel } from "./WriterProfilePanel";
 import { PlagiarismPanel } from "./PlagiarismPanel";
+import { TransferLearningPanel } from "./TransferLearningPanel";
 import { EXAMPLE_TEXTS } from "@/data/exampleTexts";
 import { Button } from "@/components/ui/button";
-import { FileText, FileJson, FileDown } from "lucide-react";
+import { FileText, FileJson, FileDown, ShieldCheck, Brain } from "lucide-react";
 import { downloadReportJSON, downloadReportPDF } from "@/lib/report";
 import { downloadBlob } from "@/lib/utils";
 import type { HybridAnalysis } from "@/lib/ml/types";
+import type { CustomModel } from "@/lib/transfer";
 
 export const TextCleaner: React.FC = () => {
   const {
@@ -49,7 +51,7 @@ export const TextCleaner: React.FC = () => {
   } = useTextCleaner();
 
   const { analyzeText } = useAIDetector();
-  const { modelState, modelInfo, analyzeWithML, isMLInitializing } = useMLDetector();
+  const { modelState, modelInfo, analyzeWithML, isMLInitializing, customModel, setCustomModel } = useMLDetector();
   const { checkPlagiarism, addRef, removeRef, clearAllRefs, references, corpusSize, lastResult: plagiarismResult, isChecking: isCheckingPlagiarism, importFile } = usePlagiarism();
 
   const [isCopied, setIsCopied] = useState(false);
@@ -57,6 +59,7 @@ export const TextCleaner: React.FC = () => {
   const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null);
   const [hybrid, setHybrid] = useState<HybridAnalysis | null>(null);
   const [showPlagiarism, setShowPlagiarism] = useState(false);
+  const [showTransferLearning, setShowTransferLearning] = useState(false);
 
   const hasText = text.trim().length > 0;
 
@@ -195,6 +198,16 @@ export const TextCleaner: React.FC = () => {
       />
 
       <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground">Outils :</span>
+        <Button variant="outline" size="sm" onClick={() => setShowPlagiarism(p => !p)} className={showPlagiarism ? "border-yellow-500/50 text-yellow-600" : ""}>
+          <ShieldCheck className="w-3.5 h-3.5" /> Plagiat
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setShowTransferLearning(p => !p)} className={showTransferLearning ? "border-primary/50 text-primary" : ""}>
+          <Brain className="w-3.5 h-3.5" /> Transfer Learning
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs text-muted-foreground">Rapport :</span>
         <Button variant="outline" size="sm" onClick={handleReportJSON} disabled={!hasText}>
           <FileJson className="w-3.5 h-3.5" /> JSON
@@ -212,6 +225,13 @@ export const TextCleaner: React.FC = () => {
       )}
 
       <AIAnalysis result={analysis} isAnalyzing={isAnalyzing} hybrid={hybrid} modelState={modelState} modelInfo={modelInfo} isMLInitializing={isMLInitializing} />
+
+      {showTransferLearning && (
+        <TransferLearningPanel
+          onModelLoaded={(m: CustomModel | null) => setCustomModel(m)}
+          activeModel={customModel}
+        />
+      )}
 
       {showPlagiarism && (
         <PlagiarismPanel
