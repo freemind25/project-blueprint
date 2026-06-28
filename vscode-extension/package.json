@@ -1,0 +1,24 @@
+{
+  "name": "unrobot-vscode",
+  "displayName": "UnRobot — AI Comment Detector",
+  "description": "Détecte les commentaires et documentation générés par IA dans votre code. 100% local, même approche que l'application web UnRobot.",
+  "version": "0.1.0",
+  "publisher": "freemind25",
+  "engines": ["vscode"],
+  "categories": ["Programming Languages", "Linters"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "unrobot.scanFile", "title": "UnRobot: Analyser ce fichier", "category": "UnRobot" },
+      { "command": "unrobot.scanWorkspace", "title": "UnRobot: Analyser le workspace", "category": "UnRobot" },
+      { "command": "unrobot.clearDecorations", "title": "UnRobot: Effacer les marquages", "category": "UnRobot" }
+    ],
+    "languages": ["javascript", "typescript", "python", "java", "csharp", "go", "rust", "cpp", "php", "ruby", "swift", "kotlin"],
+    "configuration": {
+      "unrobot.threshold": { "type": "number", "default": 50, "description": "Seuil de score IA (0-100)" },
+      "unrobot.scanOnSave": { "type": "boolean", "default": false, "description": "Analyser à la sauvegarde" },
+      "unrobot.enableDecorations": { "type": "boolean", "default": true, "description": "Afficher les décorations inline" }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Download, Trash2, Copy, Check, UserRound, ScanSearch, Undo2 } from "lucide-react";
+import { Sparkles, Download, Trash2, Copy, Check, UserRound, ScanSearch, Undo2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -16,6 +16,7 @@ interface ActionBarProps {
   onCopy: () => void;
   onAnalyze: () => void;
   onUndo: () => void;
+  onPlagiarism?: () => void;
   hasText: boolean;
   isCleaned: boolean;
   isHumanized: boolean;
@@ -23,6 +24,7 @@ interface ActionBarProps {
   isProcessing: boolean;
   isHumanizing: boolean;
   isAnalyzing: boolean;
+  isCheckingPlagiarism?: boolean;
   canUndo: boolean;
 }
 
@@ -68,6 +70,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   onCopy,
   onAnalyze,
   onUndo,
+  onPlagiarism,
   hasText,
   isCleaned,
   isHumanized,
@@ -75,6 +78,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   isProcessing,
   isHumanizing,
   isAnalyzing,
+  isCheckingPlagiarism = false,
   canUndo,
 }) => {
   return (
@@ -196,6 +200,29 @@ export const ActionBar: React.FC<ActionBarProps> = ({
         <Undo2 className="w-5 h-5 sm:mr-2" />
         <span className="hidden sm:inline">Annuler</span>
       </ToolbarButton>
+
+      {onPlagiarism && (
+        <ToolbarButton
+          onClick={onPlagiarism}
+          disabled={!hasText || isProcessing || isCheckingPlagiarism}
+          label="Vérifier plagiat"
+          size="lg"
+          className="border-yellow-500/40 text-yellow-600 hover:bg-yellow-500/10 hover:text-yellow-600 dark:text-yellow-400 dark:hover:bg-yellow-500/10 dark:hover:text-yellow-400"
+        >
+          {isCheckingPlagiarism ? (
+            <>
+              <div className="absolute inset-0 animate-shimmer" />
+              <ShieldCheck className="w-5 h-5 sm:mr-2 animate-pulse" />
+              <span className="hidden sm:inline">Vérification...</span>
+            </>
+          ) : (
+            <>
+              <ShieldCheck className="w-5 h-5 sm:mr-2" />
+              <span className="hidden sm:inline">Plagiat</span>
+            </>
+          )}
+        </ToolbarButton>
+      )}
     </div>
   );
 };

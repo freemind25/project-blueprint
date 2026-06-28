@@ -1,11 +1,17 @@
 import React from "react";
 import { AIAnalysisResult } from "@/hooks/useAIDetector";
+import { HybridAnalysis, ModelInfo, ModelState } from "@/lib/ml/types";
+import { MLStatus } from "./MLStatus";
 import { AlertTriangle, CheckCircle, XCircle, Bot, Brain, Sparkles, MessageSquare, Gauge, BookOpen, Layers, Wand2, Check, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface AIAnalysisProps {
   result: AIAnalysisResult | null;
   isAnalyzing: boolean;
+  hybrid?: HybridAnalysis | null;
+  modelState?: ModelState;
+  modelInfo?: ModelInfo | null;
+  isMLInitializing?: boolean;
 }
 
 const getScoreLabel = (score: number): { label: string; color: string; bgColor: string; icon: React.ReactNode } => {
@@ -97,7 +103,7 @@ const AnalysisSkeleton: React.FC = () => (
   </div>
 );
 
-export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing }) => {
+export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing, hybrid, modelState, modelInfo, isMLInitializing }) => {
   if (isAnalyzing) {
     return <AnalysisSkeleton />;
   }
@@ -132,6 +138,40 @@ export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing }) =
           style={{ width: `${result.score}%` }}
         />
       </div>
+
+      {/* ML Status */}
+      {(modelState || isMLInitializing) && (
+        <MLStatus state={modelState ?? "idle"} info={modelInfo ?? null} isLoading={isMLInitializing ?? false} />
+      )}
+
+      {/* Hybrid ML Score */}
+      {hybrid && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <div className="p-3 rounded-md border border-border bg-background/40 text-center">
+            <div className="text-sm text-muted-foreground mb-1">Heuristique</div>
+            <div className={`text-xl font-bold ${getScoreLabel(hybrid.heuristicScore).color}`}>
+              {hybrid.heuristicScore}%
+            </div>
+          </div>
+          <div className="p-3 rounded-md border border-primary/30 bg-primary/5 text-center">
+            <div className="text-sm text-muted-foreground mb-1 flex items-center justify-center gap-1">
+              <Brain className="w-3 h-3" /> ML
+              {hybrid.modelSource === "onnx" && (
+                <span className="text-[10px] px-1 py-0.5 rounded bg-primary/20 text-primary font-medium">ONNX</span>
+              )}
+            </div>
+            <div className={`text-xl font-bold ${getScoreLabel(hybrid.mlScore).color}`}>
+              {hybrid.mlScore}%
+            </div>
+          </div>
+          <div className="p-3 rounded-md border border-border bg-background/40 text-center">
+            <div className="text-sm text-muted-foreground mb-1">Combiné (40/60)</div>
+            <div className={`text-xl font-bold ${getScoreLabel(hybrid.combinedScore).color}`}>
+              {hybrid.combinedScore}%
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Detailed scores */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">

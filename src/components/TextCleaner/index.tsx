@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { useTextCleaner } from "@/hooks/useTextCleaner";
 import { useAIDetector, AIAnalysisResult } from "@/hooks/useAIDetector";
+import { useMLDetector } from "@/hooks/useMLDetector";
+import { usePlagiarism } from "@/hooks/usePlagiarism";
 import { MIN_ANALYSIS_LENGTH } from "@/lib/textAnalysis";
 import { Header } from "./Header";
 import { TextEditor } from "./TextEditor";
@@ -13,11 +15,13 @@ import { HumanizeLog } from "./HumanizeLog";
 import { AIAnalysis } from "./AIAnalysis";
 import { ModeSelector } from "./ModeSelector";
 import { WriterProfilePanel } from "./WriterProfilePanel";
+import { PlagiarismPanel } from "./PlagiarismPanel";
 import { EXAMPLE_TEXTS } from "@/data/exampleTexts";
 import { Button } from "@/components/ui/button";
 import { FileText, FileJson, FileDown } from "lucide-react";
 import { downloadReportJSON, downloadReportPDF } from "@/lib/report";
 import { downloadBlob } from "@/lib/utils";
+import type { HybridAnalysis } from "@/lib/ml/types";
 
 export const TextCleaner: React.FC = () => {
   const {
@@ -45,23 +49,32 @@ export const TextCleaner: React.FC = () => {
   } = useTextCleaner();
 
   const { analyzeText } = useAIDetector();
+  const { modelState, modelInfo, analyzeWithML, isMLInitializing } = useMLDetector();
+  const { checkPlagiarism, addRef, removeRef, clearAllRefs, references, corpusSize, lastResult: plagiarismResult, isChecking: isCheckingPlagiarism, importFile } = usePlagiarism();
 
   const [isCopied, setIsCopied] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null);
+  const [hybrid, setHybrid] = useState<HybridAnalysis | null>(null);
+  const [showPlagiarism, setShowPlagiarism] = useState(false);
 
   const hasText = text.trim().length > 0;
 
   const handleAnalyze = useCallback(() => {
     if (!hasText) return;
     setIsAnalyzing(true);
-    // Calcul léger, on simule un court délai pour le retour visuel
-    window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(async () => {
       const result = analyzeText(text);
       setAnalysis(result);
+      try {
+        const h = await analyzeWithML(text);
+        setHybrid(h);
+      } catch {
+        setHybrid(null);
+      }
       setIsAnalyzing(false);
     });
-  }, [text, hasText, analyzeText]);
+  }, [text, hasText, analyzeText, analyzeWithML]);
 
   const handleCopy = useCallback(async () => {
     if (!hasText) return;
@@ -85,13 +98,22 @@ export const TextCleaner: React.FC = () => {
   const handleClear = useCallback(() => {
     clearAll();
     setAnalysis(null);
+    setHybrid(null);
+    setShowPlagiarism(false);
     toast.success("Texte effacé");
   }, [clearAll]);
+
+  const handlePlagiarismCheck = useCallback(() => {
+    if (!hasText) return;
+    checkPlagiarism(text);
+    setShowPlagiarism(true);
+  }, [text, hasText, checkPlagiarism]);
 
   const handleFileLoad = useCallback(
     (content: string, fileName: string) => {
       setText(content);
       setAnalysis(null);
+      setHybrid(null);
       toast.success(`Fichier « ${fileName} » importé`);
     },
     [setText]
@@ -160,6 +182,7 @@ export const TextCleaner: React.FC = () => {
         onCopy={handleCopy}
         onAnalyze={handleAnalyze}
         onUndo={undo}
+        onPlagiarism={handlePlagiarismCheck}
         canUndo={canUndo}
         hasText={hasText}
         isCleaned={isCleaned}
@@ -168,6 +191,7 @@ export const TextCleaner: React.FC = () => {
         isProcessing={isProcessing}
         isHumanizing={isHumanizing}
         isAnalyzing={isAnalyzing}
+        isCheckingPlagiarism={isCheckingPlagiarism}
       />
 
       <div className="flex flex-wrap items-center gap-2">
@@ -187,7 +211,20 @@ export const TextCleaner: React.FC = () => {
         />
       )}
 
-      <AIAnalysis result={analysis} isAnalyzing={isAnalyzing} />
+      <AIAnalysis result={analysis} isAnalyzing={isAnalyzing} hybrid={hybrid} modelState={modelState} modelInfo={modelInfo} isMLInitializing={isMLInitializing} />
+
+      {showPlagiarism && (
+        <PlagiarismPanel
+          result={plagiarismResult}
+          isChecking={isCheckingPlagiarism}
+          references={references}
+          corpusSize={corpusSize}
+          onAddRef={addRef}
+          onRemoveRef={removeRef}
+          onClearCorpus={clearAllRefs}
+          onImportFile={importFile}
+        />
+      )}
 
       {humanizeStats && (
         <HumanizeLog
