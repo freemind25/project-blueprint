@@ -18,6 +18,8 @@ allowed-tools:
   - Grep
   - Glob
   - AskUserQuestion
+related-skills:
+  - awpa
 ---
 
 # Humanizer : supprimer les marques d'écriture IA
@@ -540,3 +542,7 @@ Fournir :
 Ce skill s'appuie sur [Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), maintenu par WikiProject AI Cleanup. Les motifs qui y sont documentés proviennent de l'observation de milliers d'occurrences de texte généré par IA sur Wikipedia.
 
 Idée clé tirée de Wikipedia : « Les LLM utilisent des algorithmes statistiques pour deviner ce qui devrait venir ensuite. Le résultat tend vers le résultat statistiquement le plus probable, applicable au plus grand nombre de cas possibles. »
+
+## Skill complémentaire : AWPA (AI Writing Pattern Analyzer)
+
+Pour l'analyse et le scoring probabiliste des textes (modules 1-10 : perplexité, burstiness, structure, connecteurs, vocabulaire générique, répétition sémantique, personnalisation, paraphrase, empreinte stylistique, rapport explicable), voir le skill **awpa** (`upload/awpa-SKILL-FR.md`). Le humanizer se concentre sur la réécriture, tandis que l'AWPA se concentre sur l'analyse et la détection.
