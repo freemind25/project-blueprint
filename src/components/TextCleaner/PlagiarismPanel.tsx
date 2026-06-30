@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { toast } from "sonner";
 import type { PlagiarismResult, ReferenceDocument } from "@/lib/plagiarism";
-import { ShieldCheck, AlertTriangle, XCircle, Upload, Trash2, Plus, FileText, Search, Clock, Database, ChevronDown, ChevronUp, X, Copy, CheckCircle } from "lucide-react";
+import { ShieldCheck, AlertTriangle, XCircle, Upload, Trash2, Plus, FileText, Search, Clock, Database, ChevronDown, ChevronUp, X, CheckCircle, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,8 +14,21 @@ interface Props {
 
 const sevCfg = { low: { c: "border-success/30 bg-success/10", ic: "text-success", l: "Faible" }, medium: { c: "border-warning/30 bg-warning/10", ic: "text-warning", l: "Modéré" }, high: { c: "border-destructive/50 bg-destructive/10", ic: "text-destructive", l: "Élevé" }, critical: { c: "border-destructive bg-destructive/20", ic: "text-destructive", l: "Critique" } };
 
+function BreakdownBar({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      <span className="w-16 text-muted-foreground truncate" title={label}>{label}</span>
+      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+        <div className="h-full bg-primary/60 rounded-full transition-all" style={{ width: `${Math.min(100, value)}%` }} />
+      </div>
+      <span className="w-8 text-right font-mono">{value}%</span>
+    </div>
+  );
+}
+
 export const PlagiarismPanel: React.FC<Props> = ({ result, isChecking, corpusSize, references, onCheck, onAddRef, onRemoveRef, onClearAllRefs, onImportFile, inputText }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
   const [newText, setNewText] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -31,7 +44,7 @@ export const PlagiarismPanel: React.FC<Props> = ({ result, isChecking, corpusSiz
             <ShieldCheck className="w-5 h-5 text-primary" />
             <div>
               <h3 className="font-semibold">Détection de plagiat</h3>
-              <p className="text-xs text-muted-foreground">MinHash · {corpusSize} réf. · 100% local</p>
+              <p className="text-xs text-muted-foreground">MinHash + Winnow + TF-IDF · {corpusSize} réf. · 100% local</p>
             </div>
           </div>
           {result && (
@@ -47,7 +60,7 @@ export const PlagiarismPanel: React.FC<Props> = ({ result, isChecking, corpusSiz
             {isChecking ? <><Search className="w-3.5 h-3.5 mr-1 animate-pulse" /> Analyse...</> : <><Search className="w-3.5 h-3.5 mr-1" /> Analyser</>}
           </Button>
           <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}><Upload className="w-3.5 h-3.5 mr-1" /> Importer</Button>
-          <input ref={fileRef} type="file" accept=".txt,.md" className="hidden" onChange={handleFile} />
+          <input ref={fileRef} type="file" accept=".txt,.md,.docx,.pdf" className="hidden" onChange={handleFile} />
           <Button variant="outline" size="sm" onClick={() => setShowForm(!showForm)}><Plus className="w-3.5 h-3.5 mr-1" /> Ajouter</Button>
           {corpusSize > 0 && <Button variant="ghost" size="sm" onClick={onClearAllRefs} className="text-destructive"><Trash2 className="w-3.5 h-3.5 mr-1" /> Vider</Button>}
         </div>
@@ -82,9 +95,26 @@ export const PlagiarismPanel: React.FC<Props> = ({ result, isChecking, corpusSiz
           <div key={i} className={`p-4 rounded-lg border ${sev.c}`}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">{m.severity === "critical" ? <XCircle className={`w-4 h-4 ${sev.ic}`} /> : <AlertTriangle className={`w-4 h-4 ${sev.ic}`} />}<span className="text-sm font-medium">{m.reference.name}</span></div>
-              <span className={`text-lg font-bold ${sev.ic}`}>{m.similarityPercent}%</span>
+              <div className="flex items-center gap-2">
+                {m.breakdown && (
+                  <button onClick={() => setShowBreakdown(showBreakdown === m.reference.id ? null : m.reference.id)} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                    <BarChart3 className="w-3 h-3" /> Détails
+                  </button>
+                )}
+                <span className={`text-lg font-bold ${sev.ic}`}>{m.similarityPercent}%</span>
+              </div>
             </div>
             <Progress value={m.similarityPercent} className="h-1.5 mb-2" />
+            {showBreakdown === m.reference.id && m.breakdown && (
+              <div className="mb-3 p-3 rounded-md bg-background/60 space-y-1.5 border border-border/50">
+                <p className="text-xs font-medium mb-2">Décomposition multi-algorithme</p>
+                <BreakdownBar label="MinHash" value={m.breakdown.minhashScore} />
+                <BreakdownBar label="Winnow" value={m.breakdown.winnowScore} />
+                <BreakdownBar label="TF-IDF" value={m.breakdown.tfidfScore} />
+                <BreakdownBar label="N-gram 4" value={m.breakdown.ngram4Score} />
+                <BreakdownBar label="Char 5-gram" value={m.breakdown.charNgramScore} />
+              </div>
+            )}
             {m.matchingPassages.length > 0 && m.matchingPassages.slice(0, 5).map((p, j) => (
               <div key={j} className="flex items-start gap-2 p-2 rounded bg-background/40 text-xs mb-1">
                 <span className="font-mono text-muted-foreground">[{p.localSimilarity}%]</span>
@@ -108,6 +138,7 @@ export const PlagiarismPanel: React.FC<Props> = ({ result, isChecking, corpusSiz
           <span className="flex items-center gap-1"><Database className="w-3 h-3" />{result.referencesChecked} ref.</span>
           <span className="flex items-center gap-1"><FileText className="w-3 h-3" />{result.inputShingleCount} shingles</span>
           <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{result.analysisTimeMs} ms</span>
+          <span className="flex items-center gap-1"><BarChart3 className="w-3 h-3" />MinHash+Winnow+TF-IDF</span>
         </div>
       )}
     </div>

@@ -405,6 +405,279 @@ export const AI_PATTERNS: PatternDef[] = [
     issue: "Locutions qui allongent les phrases sans apporter d'information.",
     suggestion: "Supprimez ou remplacez par une formulation directe.",
   },
+
+  // ── ENGLISH-SPECIFIC AI PATTERNS (Originality.ai / Copyleaks level) ─
+
+  // EN-1: "Delve into" — the #1 most overused AI phrase
+  {
+    category: "EN: Overused AI Phrases",
+    severity: "high",
+    points: 8,
+    regex: /\b(delve (into|deeper)|delving (into|deeper))\b/gi,
+    issue: "\"Delve into\" is the single most overused phrase in AI-generated text.",
+    suggestion: "Use: explore, examine, look at, dig into, analyze.",
+  },
+  // EN-2: "It's worth noting" / "It is important to note"
+  {
+    category: "EN: Filler Phrases",
+    severity: "medium",
+    points: 5,
+    regex: /\b(it'?s? worth (noting|mentioning|pointing out)|it is worth (noting|mentioning))\b/gi,
+    issue: "Filler phrase that adds no information — classic AI padding.",
+    suggestion: "Delete it. State the fact directly.",
+  },
+  // EN-3: "Tapestry" metaphor
+  {
+    category: "EN: Overblown Metaphors",
+    severity: "high",
+    points: 7,
+    regex: /\b(a rich tapestry|tapestry of|a symphony of)\b/gi,
+    issue: "Overblown metaphor AI uses to sound poetic.",
+    suggestion: "Describe what you mean literally.",
+  },
+  // EN-4: "Testament to"
+  {
+    category: "EN: Overblown Metaphors",
+    severity: "medium",
+    points: 5,
+    regex: /\b(a testament to|serves? as a testament|stands? as a testament)\b/gi,
+    issue: "AI loves calling things \"a testament to\" something.",
+    suggestion: "Use: shows, proves, demonstrates, reflects.",
+  },
+  // EN-5: "Navigating the landscape/complexities"
+  {
+    category: "EN: Corporate Jargon",
+    severity: "high",
+    points: 7,
+    regex: /\b(navigat(?:e|ing) (the|a|our|their) (?:complexities?|landscape|terrain|world)|navigat(?:e|ing) (?:through|across|these))\b/gi,
+    issue: "Overused AI metaphor for dealing with something complex.",
+    suggestion: "Use: handling, dealing with, addressing, managing.",
+  },
+  // EN-6: "A myriad of" / "myriad"
+  {
+    category: "EN: Filler Phrases",
+    severity: "low",
+    points: 3,
+    regex: /\b(a myriad of|an array of|a multitude of|a plethora of)\b/gi,
+    issue: "AI overuses these to sound sophisticated when \"many\" or \"lots of\" would work.",
+    suggestion: "Use: many, various, dozens of, or just list them.",
+  },
+  // EN-7: "Sheds light on" / "sheds insight"
+  {
+    category: "EN: Overused AI Phrases",
+    severity: "medium",
+    points: 5,
+    regex: /\b(sheds? (?:light|insight|clarity) on)\b/gi,
+    issue: "AI cliché for explaining or revealing something.",
+    suggestion: "Use: explains, reveals, shows, clarifies.",
+  },
+  // EN-8: "Paramount" / "Paramount importance"
+  {
+    category: "EN: Vocab IA EN",
+    severity: "medium",
+    points: 5,
+    regex: /\b(paramount (?:importance|concern)|of paramount)\b/gi,
+    issue: "AI consistently overuses \"paramount\" instead of \"important\" or \"critical\".",
+    suggestion: "Use: crucial, essential, vital, or simply important.",
+  },
+  // EN-9: "Foster" / "Cultivate" / "Nurture"
+  {
+    category: "EN: Vocab IA EN",
+    severity: "medium",
+    points: 5,
+    regex: /\b(fostering?|cultivating?|nurturing?)\s+\w+(?:\s+\w+){0,3}\b/gi,
+    issue: "AI loves these verbs for \"encouraging/growing\" something abstract.",
+    suggestion: "Use: support, build, grow, help, encourage.",
+  },
+  // EN-10: "In an era where" / "In a world where"
+  {
+    category: "EN: Cliché Openings",
+    severity: "high",
+    points: 8,
+    regex: /\b(in (?:an|this) (?:era|age|world|landscape) (?:where|of|characterized by))\b/gi,
+    issue: "One of the most clichéd AI opening formulas.",
+    suggestion: "Start with a specific fact, not a vague era description.",
+  },
+  // EN-11: "Underscores" / "Highlights" used as verbs excessively
+  {
+    category: "EN: Overused AI Phrases",
+    severity: "medium",
+    points: 4,
+    regex: /\b(underscores?|highlights?|brings? to the forefront)\b/gi,
+    issue: "AI overuses these verbs for \"shows\" or \"emphasizes\".",
+    suggestion: "Use: shows, emphasizes, proves, makes clear.",
+  },
+  // EN-12: "Transformative" / "Revolutionary" / "Groundbreaking"
+  {
+    category: "EN: Promotional Language",
+    severity: "high",
+    points: 7,
+    regex: /\b(transformative|revolutionary|groundbreaking|game-changing|paradigm-shift(?:ing)?)\b/gi,
+    issue: "Hyperbolic adjectives AI inserts to make things sound impressive.",
+    suggestion: "Use: new, significant, important, or cite specific improvements.",
+  },
+  // EN-13: "Holistic approach" / "Comprehensive solution"
+  {
+    category: "EN: Corporate Jargon",
+    severity: "medium",
+    points: 5,
+    regex: /\b((?:a\s+)?holistic (?:approach|view|perspective|strategy)|comprehensive (?:solution|approach|framework|strategy))\b/gi,
+    issue: "Buzzwords that sound professional but mean nothing specific.",
+    suggestion: "Describe what the approach actually does.",
+  },
+  // EN-14: "Seamless" / "Seamlessly"
+  {
+    category: "EN: Corporate Jargon",
+    severity: "medium",
+    points: 4,
+    regex: /\b(seamless(?:ly)?)\b/gi,
+    issue: "AI's favorite adjective for anything that works smoothly.",
+    suggestion: "Use: smooth, easy, integrated, or describe what actually happens.",
+  },
+  // EN-15: "Demystify" / "Unpack"
+  {
+    category: "EN: Overused AI Phrases",
+    severity: "low",
+    points: 3,
+    regex: /\b(demystif(?:y|ying)|unpack(?:ing|s)?)\b/gi,
+    issue: "AI uses these meta-verbs to announce it's about to explain something.",
+    suggestion: "Just explain it directly without the announcement.",
+  },
+  // EN-16: "It goes without saying" / "Needless to say"
+  {
+    category: "EN: Filler Phrases",
+    severity: "medium",
+    points: 4,
+    regex: /\b(it goes without saying|needless to say|as one might expect|it stands to reason)\b/gi,
+    issue: "If it goes without saying, don't say it.",
+    suggestion: "Delete the phrase entirely.",
+  },
+  // EN-17: "Resonate" / "Strikes a chord"
+  {
+    category: "EN: Overblown Metaphors",
+    severity: "low",
+    points: 3,
+    regex: /\b(resonat(?:es?|ing)|strikes? a chord (?:with)?)\b/gi,
+    issue: "AI uses emotional metaphors to add false depth.",
+    suggestion: "Use: appeals to, connects with, or describe the actual effect.",
+  },
+  // EN-18: "Paving the way" / "Charting a course"
+  {
+    category: "EN: Cliché Metaphors",
+    severity: "medium",
+    points: 5,
+    regex: /\b(paving? the way (?:for|forward|to)|charting? (?:a|its|the) (?:course|path|way))\b/gi,
+    issue: "AI's go-to metaphor for any kind of progress.",
+    suggestion: "Describe the specific progress being made.",
+  },
+  // EN-19: "Stark contrast" / "Stark reminder"
+  {
+    category: "EN: Overused AI Phrases",
+    severity: "low",
+    points: 3,
+    regex: /\b(stark (?:contrast|reminder|difference|reality))\b/gi,
+    issue: "AI loves \"stark\" as an intensifier.",
+    suggestion: "Use: sharp, clear, strong, or drop the intensifier.",
+  },
+  // EN-20: "In conclusion" / "To sum up" / "Wrapping up"
+  {
+    category: "EN: Formulaic Endings",
+    severity: "high",
+    points: 6,
+    regex: /\b(in conclusion|to sum up|to summarize|wrapping up|bringing it all together|as we've (?:seen|explored|discussed))\b/gi,
+    issue: "AI insists on formally announcing the end of its text.",
+    suggestion: "End with your final point. No announcement needed.",
+  },
+  // EN-21: "Both X and Y" overuse
+  {
+    category: "EN: Structural Patterns",
+    severity: "medium",
+    points: 4,
+    regex: /(?:both)\s+\w+\s+and\s+\w+\s+(?:and|are|is|have|can|will).*(?:both)\s+\w+\s+and\s+\w+/gi,
+    issue: "AI overuses the \"both X and Y\" parallel structure.",
+    suggestion: "Vary your sentence structure. Not everything needs to be \"both...and\".",
+  },
+  // EN-22: "In essence" / "At its core" / "Fundamentally"
+  {
+    category: "EN: Filler Phrases",
+    severity: "medium",
+    points: 4,
+    regex: /\b(in essence|at its (?:core|heart)|fundamentally|ultimately)\b/gi,
+    issue: "AI pads summaries and transitions with these empty intensifiers.",
+    suggestion: "State the point directly without the preface.",
+  },
+  // EN-23: "Key takeaway" / "Takeaway"
+  {
+    category: "EN: Corporate Jargon",
+    severity: "low",
+    points: 3,
+    regex: /\b(key takeaways?|the (?:main|primary|key) takeaway)\b/gi,
+    issue: "Corporate speak that AI inserts before lists.",
+    suggestion: "Use: main points, important points, or just list them.",
+  },
+  // EN-24: "Elevate" / "Elevating"
+  {
+    category: "EN: Corporate Jargon",
+    severity: "low",
+    points: 3,
+    regex: /\belevat(?:e|es|ed|ing)\s/gi,
+    issue: "AI uses \"elevate\" as a fancy verb for \"improve\".",
+    suggestion: "Use: improve, enhance, upgrade, or be specific.",
+  },
+  // EN-25: "Space" / "Realm" used metaphorically
+  {
+    category: "EN: Corporate Jargon",
+    severity: "medium",
+    points: 4,
+    regex: /\b(in (?:this|the|that) (?:space|realm)|the \w+ space)\b/gi,
+    issue: "Vague \"space\" and \"realm\" instead of naming the actual field.",
+    suggestion: "Name the specific field: industry, market, domain, area.",
+  },
+  // EN-26: "Drive" used as causative verb excessively
+  {
+    category: "EN: Corporate Jargon",
+    severity: "medium",
+    points: 4,
+    regex: /\b(driv(?:e|es|en|ing)\s+(?:innovation|growth|engagement|success|results|change|value|adoption|efficiency|impact))\b/gi,
+    issue: "AI overuses \"drive X\" as a verb-noun collocation.",
+    suggestion: "Use: cause, lead to, produce, create, or rephrase.",
+  },
+  // EN-27: "Leverage" / "Utilize"
+  {
+    category: "EN: Corporate Jargon",
+    severity: "medium",
+    points: 4,
+    regex: /\b(leverage|utilize|utilise)\b/gi,
+    issue: "Fancy words for \"use\" that AI inserts to sound professional.",
+    suggestion: "Use: use, apply, work with.",
+  },
+  // EN-28: "Robust" / "Scalable" / "Extensible"
+  {
+    category: "EN: Corporate Jargon",
+    severity: "low",
+    points: 2,
+    regex: /\b(robust|scalable|extensible)\b/gi,
+    issue: "Technical buzzwords used outside of technical contexts.",
+    suggestion: "Use: strong, reliable, expandable, or be specific.",
+  },
+  // EN-29: "Embody" / "Embodies"
+  {
+    category: "EN: Overblown Metaphors",
+    severity: "low",
+    points: 3,
+    regex: /\b(embod(?:y|ies|ied|ying))\b/gi,
+    issue: "AI uses \"embody\" to make things sound more profound than they are.",
+    suggestion: "Use: represent, show, express, or describe concretely.",
+  },
+  // EN-30: "Not only... but also" overuse
+  {
+    category: "EN: Structural Patterns",
+    severity: "medium",
+    points: 5,
+    regex: /\bnot only\s+.{5,50}?\s+but\s+(also\s+|even\s+|it\s+)/gi,
+    issue: "AI overuses this correlative conjunction to add emphasis.",
+    suggestion: "Use separate sentences or simpler constructions.",
+  },
 ];
 
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));

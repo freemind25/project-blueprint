@@ -583,6 +583,256 @@ const RULES: Rule[] = [
     to: (m, p1, w1, w2) => p1 + w1 + " " + w2.toLowerCase(),
     minIntensity: "light",
   },
+
+  // ── ENGLISH-SPECIFIC HUMANIZER RULES ────────────────────────────
+
+  // EN-H1: "Delve into" replacement
+  {
+    type: "en-overused",
+    reason: "Replacing AI's #1 overused phrase \"delve into\"",
+    regex: /\b(delve (?:into|deeper)|delving (?:into|deeper))\b/gi,
+    to: ["explore", "examine", "look at", "dig into", "analyze"],
+    minIntensity: "light",
+  },
+  // EN-H2: "It's worth noting" removal
+  {
+    type: "en-filler",
+    reason: "Removing filler phrase \"it's worth noting\"",
+    regex: /\b(it'?s? worth (?:noting|mentioning|pointing out))\s*,?\s*/gi,
+    to: "",
+    minIntensity: "light",
+  },
+  // EN-H3: "Tapestry" / "symphony" metaphor removal
+  {
+    type: "en-metaphor",
+    reason: "Replacing overblown AI metaphors",
+    regex: /\b(a rich tapestry|tapestry of|a symphony of)\s+/gi,
+    to: "a mix of ",
+    minIntensity: "light",
+  },
+  // EN-H4: "A testament to" replacement
+  {
+    type: "en-metaphor",
+    reason: "Replacing \"testament to\" with plain English",
+    regex: /\b(serves?|stands?) as a testament to\b/gi,
+    to: ["shows", "proves", "demonstrates"],
+    minIntensity: "light",
+  },
+  // EN-H5: "Navigating the landscape" replacement
+  {
+    type: "en-jargon",
+    reason: "Replacing AI's favorite metaphor for dealing with complexity",
+    regex: /\bnavigat(?:e|ing) (?:the|a|our|their) (?:complexities?|landscape|terrain|world)\b/gi,
+    to: ["handling", "dealing with", "managing", "tackling"],
+    minIntensity: "light",
+  },
+  // EN-H6: "A myriad of" / "plethora of" replacement
+  {
+    type: "en-filler",
+    reason: "Replacing fancy quantifiers with simple ones",
+    regex: /\b(a myriad of|an array of|a multitude of|a plethora of)\b/gi,
+    to: ["many", "various", "lots of", "dozens of"],
+    minIntensity: "light",
+  },
+  // EN-H7: "Sheds light on" replacement
+  {
+    type: "en-overused",
+    reason: "Replacing AI cliché \"sheds light on\"",
+    regex: /\bsheds? (?:light|insight|clarity) on\b/gi,
+    to: ["explains", "reveals", "shows", "clarifies"],
+    minIntensity: "light",
+  },
+  // EN-H8: "Paramount importance" replacement
+  {
+    type: "en-vocab",
+    reason: "Replacing overused AI word \"paramount\"",
+    regex: /\bof paramount (?:importance|concern)\b/gi,
+    to: ["essential", "crucial", "very important"],
+    minIntensity: "light",
+  },
+  // EN-H9: "Foster" / "Cultivate" / "Nurture" replacement
+  {
+    type: "en-vocab",
+    reason: "Replacing AI verbs for \"encourage\"",
+    regex: /\b(fostering?|cultivating?|nurturing?)\s+/gi,
+    to: ["supporting ", "building ", "growing ", "encouraging "],
+    minIntensity: "moderate",
+  },
+  // EN-H10: "In an era where" opening removal
+  {
+    type: "en-opening",
+    reason: "Removing cliché AI era/world opening",
+    regex: /\bIn (?:an|this) (?:era|age|world|landscape) (?:where|of)[^.]*,\s*/gi,
+    to: "",
+    minIntensity: "light",
+  },
+  // EN-H11: "Transformative" / "Revolutionary" / "Groundbreaking"
+  {
+    type: "en-promo",
+    reason: "Replacing hyperbolic adjectives",
+    regex: /\b(transformative|groundbreaking|game-changing|paradigm-shift(?:ing)?)\b/gi,
+    to: ["new", "important", "significant", "notable"],
+    minIntensity: "moderate",
+  },
+  // EN-H12: "Holistic approach" / "Comprehensive solution"
+  {
+    type: "en-jargon",
+    reason: "Replacing empty buzzwords with nothing specific",
+    regex: /\b(?:a\s+)?holistic (?:approach|view|perspective|strategy)\b/gi,
+    to: ["broad approach", "complete approach", "full approach"],
+    minIntensity: "moderate",
+  },
+  // EN-H13: "Seamless" / "Seamlessly" replacement
+  {
+    type: "en-jargon",
+    reason: "Replacing AI's favorite adjective",
+    regex: /\bseamless(?:ly)?\b/gi,
+    to: ["smooth", "easy", "integrated"],
+    minIntensity: "moderate",
+  },
+  // EN-H14: "Demystify" / "Unpack" replacement
+  {
+    type: "en-overused",
+    reason: "Removing meta-verbs that announce explanations",
+    regex: /\b(demystif(?:y|ying)|unpack(?:ing|s)?)\s+/gi,
+    to: "",
+    minIntensity: "light",
+  },
+  // EN-H15: "It goes without saying" / "Needless to say" removal
+  {
+    type: "en-filler",
+    reason: "Removing contradictory filler phrases",
+    regex: /\b(it goes without saying|needless to say|as one might expect|it stands to reason),?\s*/gi,
+    to: "",
+    minIntensity: "light",
+  },
+  // EN-H16: "Paving the way" replacement
+  {
+    type: "en-metaphor",
+    reason: "Replacing AI's go-to progress metaphor",
+    regex: /\bpaving? the way (?:for|forward|to)\b/gi,
+    to: ["leading to", "making possible", "enabling"],
+    minIntensity: "light",
+  },
+  // EN-H17: "In conclusion" / "To sum up" removal
+  {
+    type: "en-ending",
+    reason: "Removing AI's formal conclusion announcements",
+    regex: /\b(in conclusion|to sum up|to summarize|wrapping up|bringing it all together|as we've (?:seen|explored|discussed)),?\s*/gi,
+    to: "",
+    minIntensity: "light",
+  },
+  // EN-H18: "In essence" / "At its core" / "Fundamentally" removal
+  {
+    type: "en-filler",
+    reason: "Removing empty intensifier prefices",
+    regex: /\b(in essence|at its (?:core|heart)|fundamentally)\s*,?\s*/gi,
+    to: "",
+    minIntensity: "moderate",
+  },
+  // EN-H19: "Key takeaway" replacement
+  {
+    type: "en-jargon",
+    reason: "Replacing corporate speak",
+    regex: /\b(?:the )?(?:main|primary|key) takeaway(?:s)?\b/gi,
+    to: ["main points", "important points", "key points"],
+    minIntensity: "light",
+  },
+  // EN-H20: "Leverage" / "Utilize" replacement
+  {
+    type: "en-jargon",
+    reason: "Replacing fancy words for \"use\"",
+    regex: /\b(leverage|utilize|utilise)\b/gi,
+    to: ["use", "apply", "work with"],
+    minIntensity: "light",
+  },
+  // EN-H21: "Not only... but also" simplification
+  {
+    type: "en-structure",
+    reason: "Simplifying overused correlative conjunction",
+    regex: /\bnot only\s+(.{5,50}?)\s+but\s+(also\s+|even\s+)(.{5,50}?)([.,]|$)/gi,
+    to: (m, p1, _p2, p3, p4) => `${p1.trim()}. Also, ${p3.trim()}${p4}`,
+    minIntensity: "moderate",
+  },
+  // EN-H22: "Robust" / "Scalable" replacement
+  {
+    type: "en-jargon",
+    reason: "Replacing tech buzzwords in non-tech contexts",
+    regex: /\b(robust|scalable|extensible)\b/gi,
+    to: ["strong", "reliable", "flexible"],
+    minIntensity: "light",
+  },
+  // EN-H23: "Drive innovation/growth/engagement" replacement
+  {
+    type: "en-jargon",
+    reason: "Replacing overused AI causative verb pattern",
+    regex: /\bdriv(?:e|es|en|ing)\s+(innovation|growth|engagement|success|results|change|value|adoption|efficiency|impact)\b/gi,
+    to: (m) => {
+      const noun = m.replace(/^driv\w*\s+/i, "");
+      const replacements: Record<string, string> = {
+        innovation: "spur innovation",
+        growth: "fuel growth",
+        engagement: "boost engagement",
+        success: "lead to success",
+        results: "produce results",
+        change: "create change",
+        value: "deliver value",
+        adoption: "encourage adoption",
+        efficiency: "improve efficiency",
+        impact: "make an impact",
+      };
+      return replacements[noun] || m;
+    },
+    minIntensity: "moderate",
+  },
+  // EN-H24: "In this space/realm" replacement
+  {
+    type: "en-jargon",
+    reason: "Replacing vague spatial metaphors with concrete field names",
+    regex: /\bin (?:this|the|that) (?:space|realm)\b/gi,
+    to: ["in this field", "in this area", "in this industry"],
+    minIntensity: "light",
+  },
+  // EN-H25: "Elevate" replacement
+  {
+    type: "en-jargon",
+    reason: "Replacing fancy AI verb for \"improve\"",
+    regex: /\belevat(?:e|es|ed|ing)\s/gi,
+    to: ["improve ", "enhance ", "upgrade "],
+    minIntensity: "moderate",
+  },
+  // EN-H26: "Stark contrast/reminder" replacement
+  {
+    type: "en-overused",
+    reason: "Replacing AI's favorite intensifier",
+    regex: /\bstark (?:contrast|reminder|difference|reality)\b/gi,
+    to: (m) => m.replace("stark ", ""),
+    minIntensity: "light",
+  },
+  // EN-H27: "Resonate" / "Strikes a chord" replacement
+  {
+    type: "en-metaphor",
+    reason: "Replacing emotional AI metaphors",
+    regex: /\b(resonat(?:es?|ing)|strikes? a chord (?:with)?)\b/gi,
+    to: ["appeals to", "connects with", "matters to"],
+    minIntensity: "light",
+  },
+  // EN-H28: "Charting a course" replacement
+  {
+    type: "en-metaphor",
+    reason: "Replacing AI's course/path metaphor",
+    regex: /\bcharting? (?:a|its|the) (?:course|path|way)\b/gi,
+    to: ["planning", "setting a direction for", "mapping out"],
+    minIntensity: "light",
+  },
+  // EN-H29: "Embody" replacement
+  {
+    type: "en-metaphor",
+    reason: "Replacing profound-sounding AI verb",
+    regex: /\bembod(?:y|ies|ied|ying)\b/gi,
+    to: ["represent", "show", "express", "demonstrate"],
+    minIntensity: "light",
+  },
 ];
 
 /** Un seul passage de réécriture. Retourne le texte + le journal. */

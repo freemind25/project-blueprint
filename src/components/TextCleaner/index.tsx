@@ -25,6 +25,7 @@ const HumanizeLog = lazy(() => import("./HumanizeLog").then(m => ({ default: m.H
 const AIAnalysis = lazy(() => import("./AIAnalysis").then(m => ({ default: m.AIAnalysis })));
 const PlagiarismPanel = lazy(() => import("./PlagiarismPanel").then(m => ({ default: m.PlagiarismPanel })));
 const TransferLearningPanel = lazy(() => import("./TransferLearningPanel").then(m => ({ default: m.TransferLearningPanel })));
+const BatchProcessor = lazy(() => import("./BatchProcessor").then(m => ({ default: m.BatchProcessor })));
 
 /* Chargement paresseux des rapports */
 let reportCache: typeof import("@/lib/report") | null = null;
@@ -198,6 +199,11 @@ export const TextCleaner: React.FC = () => {
     <HumanizeLog changeLog={humanizeStats.changeLog} summary={{ passes: humanizeStats.passes, scoreBefore: humanizeStats.scoreBefore, scoreAfter: humanizeStats.scoreAfter, mode: humanizeStats.mode, intensity: humanizeStats.intensity }} />
   </Suspense>
       )}
+
+      {/* Tauri Desktop: Batch Processing (only visible in desktop mode) */}
+      <Suspense fallback={null}>
+        <BatchProcessor />
+      </Suspense>
     </div>
   );
 };
