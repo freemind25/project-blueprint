@@ -3,6 +3,9 @@ export type ModelSource = "builtin" | "onnx" | "custom";
 export interface TextFeatures {
   heuristicScores: number[]; syntaxFeatures: number[];
   lexicalFeatures: number[]; patternFeatures: number[];
+  structureFeatures: number[]; semanticFeatures: number[];
+  personalFeatures: number[]; paraphraseFeatures: number[];
+  styleFeatures: number[];
   flat: Float32Array;
 }
 export interface MLPrediction {

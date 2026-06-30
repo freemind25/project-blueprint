@@ -41,7 +41,8 @@ export const useMLDetector = (): UseMLDetectorReturn => {
   }, []);
 
   const analyzeWithML = useCallback(async (text: string): Promise<HybridAnalysis> => {
-    const heuristicResult: AIAnalysisResult = text.length >= MIN_ANALYSIS_LENGTH ? analyzeText(text) : { score: 0, perplexityScore: 0, burstinessScore: 0, transitionScore: 0, perfectionScore: 0, voiceScore: 0, vocabularyScore: 0, depthScore: 0, humanizationScore: 0, sucksScore: 0, patternCount: 0, checklist: [], details: [] };
+    const emptyFingerprint = { sentenceLength: 0, vocabularyDensity: 0, connectorRate: 0, repetitionRate: 0, complexity: 0, personalMarkers: 0 };
+    const heuristicResult: AIAnalysisResult = text.length >= MIN_ANALYSIS_LENGTH ? analyzeText(text) : { score: 0, perplexityScore: 0, burstinessScore: 0, transitionScore: 0, perfectionScore: 0, voiceScore: 0, vocabularyScore: 0, depthScore: 0, structureScore: 0, semanticRepetitionScore: 0, personalizationScore: 0, paraphraseScore: 0, styleScore: 0, humanizationScore: 100, sucksScore: 0, patternCount: 0, checklist: [], details: [], styleFingerprint: emptyFingerprint };
     const heuristicScores = [heuristicResult.burstinessScore, heuristicResult.transitionScore, heuristicResult.perfectionScore, heuristicResult.voiceScore, heuristicResult.perplexityScore, heuristicResult.vocabularyScore, heuristicResult.depthScore];
     let mlScore = heuristicResult.score, mlPrediction: MLPrediction | undefined;
     try {

@@ -113,7 +113,11 @@ export function downloadReportPDF(data: ReportData) {
   // Score principal
   const mainScore = a?.score ?? 0;
   const mainColor = scoreColor(mainScore);
-  const verdict = mainScore >= 70 ? "Probablement généré par IA" : mainScore >= 45 ? "Possiblement généré par IA" : "Probablement écrit par un humain";
+  const verdict = mainScore >= 70
+    ? "Ce texte présente des caractéristiques compatibles avec une génération IA"
+    : mainScore >= 45
+      ? "Ce texte présente des caractéristiques partiellement compatibles avec une génération IA"
+      : "Ce texte présente des caractéristiques d'écriture humaine";
 
   // Barres de scores détaillés
   const scoreBars = a ? [
@@ -124,6 +128,11 @@ export function downloadReportPDF(data: ReportData) {
     barHtml("Voix générique", a.voiceScore),
     barHtml("Vocabulaire", a.vocabularyScore),
     barHtml("Profondeur", a.depthScore),
+    barHtml("Structure IA", a.structureScore),
+    barHtml("Répét. sémantique", a.semanticRepetitionScore),
+    barHtml("Personnalisation", a.personalizationScore),
+    barHtml("Paraphrase IA", a.paraphraseScore),
+    barHtml("Style", a.styleScore),
   ] : [];
 
   // Radar chart
@@ -132,7 +141,8 @@ export function downloadReportPDF(data: ReportData) {
     { label: "Transitions", value: a.transitionScore },
     { label: "Voix", value: a.voiceScore },
     { label: "Vocab.", value: a.vocabularyScore },
-    { label: "Profondeur", value: a.depthScore },
+    { label: "Structure", value: a.structureScore },
+    { label: "Style", value: a.styleScore },
     { label: "SUCKS", value: a.sucksScore },
   ] : [];
   const radar = radarData.length >= 3 ? radarSvg(radarData) : "";
@@ -310,6 +320,19 @@ ${a ? `
 
 ${beforeAfterHtml}
 ${issuesHtml}
+
+${a?.styleFingerprint ? `
+<div class="section">
+  <h2>Empreinte de style (Style Fingerprint)</h2>
+  <table class="meta-table">
+    <tr><td>Longueur moy. phrases</td><td style="text-align:right;font-weight:600">${a.styleFingerprint.sentenceLength} mots</td></tr>
+    <tr><td>Densité lexicale (TTR)</td><td style="text-align:right;font-weight:600">${(a.styleFingerprint.vocabularyDensity * 100).toFixed(1)}%</td></tr>
+    <tr><td>Taux de connecteurs</td><td style="text-align:right;font-weight:600">${a.styleFingerprint.connectorRate.toFixed(4)}</td></tr>
+    <tr><td>Taux de répétition</td><td style="text-align:right;font-weight:600">${(a.styleFingerprint.repetitionRate * 100).toFixed(1)}%</td></tr>
+    <tr><td>Complexité (long. moy. mots)</td><td style="text-align:right;font-weight:600">${a.styleFingerprint.complexity} car.</td></tr>
+    <tr><td>Marques personnelles</td><td style="text-align:right;font-weight:600">${a.styleFingerprint.personalMarkers.toFixed(3)} / phrase</td></tr>
+  </table>
+</div>` : ""}
 
 <div class="section">
   <h2>Texte analysé</h2>

@@ -1,7 +1,7 @@
 /**
  * Pipeline d'entraînement Transfer Learning in-browser — 100% pur JavaScript.
  *
- * Architecture : 24 (features) → 32 (ReLU) → 16 (ReLU) → 1 (Sigmoid)
+ * Architecture : 38 (features) → 32 (ReLU) → 16 (ReLU) → 1 (Sigmoid)
  * Optimiseur : Adam (implémentation JS)
  * Loss : Binary Cross-Entropy
  *

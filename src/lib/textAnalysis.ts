@@ -4,6 +4,15 @@
  */
 import { splitSentences } from "./utils";
 
+export interface StyleFingerprint {
+  sentenceLength: number;
+  vocabularyDensity: number;
+  connectorRate: number;
+  repetitionRate: number;
+  complexity: number;
+  personalMarkers: number;
+}
+
 export interface AIAnalysisResult {
   score: number;
   perplexityScore: number;
@@ -13,11 +22,17 @@ export interface AIAnalysisResult {
   voiceScore: number;
   vocabularyScore: number;
   depthScore: number;
+  structureScore: number;
+  semanticRepetitionScore: number;
+  personalizationScore: number;
+  paraphraseScore: number;
+  styleScore: number;
   humanizationScore: number;
   sucksScore: number;
   patternCount: number;
   checklist: ChecklistItem[];
   details: AnalysisDetail[];
+  styleFingerprint: StyleFingerprint;
 }
 
 export interface AnalysisDetail {
@@ -47,16 +62,24 @@ interface PatternDef {
 /** Longueur minimale (caractères) pour lancer une analyse significative. */
 export const MIN_ANALYSIS_LENGTH = 50;
 
-/** Pondérations des sous-scores dans le score global. */
+/**
+ * AI_SCORE = (Perplexity + Burstiness + Style + Structure + Lexical + Semantic) / N
+ * Formule multi-signaux conforme au module AWPA.
+ */
 const SCORE_WEIGHTS = {
-  burstiness: 0.2,
-  transition: 0.15,
-  perfection: 0.15,
-  voice: 0.2,
-  perplexity: 0.1,
-  vocabulary: 0.1,
-  depth: 0.1,
-  maxPatternPoints: 40,
+  burstiness: 0.15,
+  transition: 0.10,
+  perfection: 0.05,
+  voice: 0.10,
+  perplexity: 0.15,
+  vocabulary: 0.10,
+  depth: 0.05,
+  structure: 0.10,
+  semanticRepetition: 0.05,
+  personalization: 0.05,
+  paraphrase: 0.05,
+  style: 0.05,
+  maxPatternPoints: 30,
 } as const;
 
 /** Multiplicateurs de normalisation pour chaque sous-score. */
@@ -66,6 +89,10 @@ const MULTIPLIERS = {
   voice: 350,
   perplexity: 1.8,
   depth: 900,
+ structure: 800,
+  semanticRepetition: 500,
+  personalization: 300,
+  paraphrase: 400,
 } as const;
 
 /** Pondérations et seuils du score SUCKS. */
@@ -678,6 +705,81 @@ export const AI_PATTERNS: PatternDef[] = [
     issue: "AI overuses this correlative conjunction to add emphasis.",
     suggestion: "Use separate sentences or simpler constructions.",
   },
+
+  // ── MODULE 3 : DÉTECTION DE STRUCTURE IA ──────────────────────────
+
+  // STRUCT-1: Énumération ordonnée artificielle
+  {
+    category: "Structure énumérative",
+    severity: "high",
+    points: 8,
+    regex: /\b(premièr(?:ement|ement)|deuxièmement|troisièmement|quatrièmement|cinquièmement|ensuite|enfin)\b/gi,
+    issue: "Énumération ordonnée rigide (premièrement, deuxièmement...), typique des textes IA.",
+    suggestion: "Utilisez des transitions naturelles ou supprimez les marqueurs d'ordre.",
+  },
+  // STRUCT-2: Symétrie paragraphe (paragraphes de taille quasi-identique)
+  // Détecté par calcul dans analyzeText, pas par regex.
+
+  // ── MODULE 5 : VOCABULAIRE GÉNÉRIQUE (AI_PHRASES) ────────────────
+
+  {
+    category: "Phrases génériques IA",
+    severity: "high",
+    points: 6,
+    regex: /\b(approche innovante|solution pertinente|enjeux majeurs|impact significatif|contexte en constante évolution|perspectives prometteuses|avancée majeure|potentiel considérable|défis (majeurs|importants)|progrès (significatifs|remarquables))\b/gi,
+    issue: "Formulation générique vide de sens concret, caractéristique des textes IA.",
+    suggestion: "Remplacez par des descriptions factuelles avec des chiffres ou exemples précis.",
+  },
+  // PHRASES-2: Connecteurs à fort risque (Module 4)
+  {
+    category: "Connecteurs à fort risque",
+    severity: "medium",
+    points: 5,
+    regex: /\b(en outre|cette approche permet|il convient de noter que)\b/gi,
+    issue: "Connecteur logique fortement associé aux textes générés par IA.",
+    suggestion: "Supprimez ou remplacez par une transition plus naturelle.",
+  },
+
+  // ── MODULE 8 : DÉTECTION PARAPHRASE IA ───────────────────────────
+
+  {
+    category: "Paraphrase IA",
+    severity: "medium",
+    points: 5,
+    regex: /\b(contribue(?:nt)? à optimiser|permet(?:tent)? d'améliorer|vise(?:nt)? à renforcer|aident à maximiser|facilite(?:nt)? la mise en œuvre)\b/gi,
+    issue: "Reformulation artificielle : phrase complexe sans gain d'information par rapport au verbe simple.",
+    suggestion: "Utilisez un verbe direct : améliorer, renforcer, maximiser, appliquer.",
+  },
+  {
+    category: "Paraphrase IA",
+    severity: "medium",
+    points: 4,
+    regex: /\b(le système robotisé|la solution proposée|le dispositif mis en place|l'outil développé)\s+(contribue à|permet d'|vise à|aide à)\s+(optimiser|améliorer|renforcer)\s+(les performances?|les résultats?|la productivité|l'efficacité)\b/gi,
+    issue: "Paraphrase typique IA : nominalisation + verbe faible + complément abstrait.",
+    suggestion: "Exemple : « Le robot améliore la production. » au lieu de « Le système robotisé contribue à optimiser les performances productives. »",
+  },
+
+  // ── MODULE 7 : ABSENCE DE PERSONNALISATION ───────────────────────
+
+  {
+    category: "Absence de personnalisation",
+    severity: "medium",
+    points: 5,
+    regex: /\b(cette technologie (améliore|transforme|révolutionne)|ces outils (permettent|aident)|cette méthode (améliore|optimise))\s+(les entreprises|les organisations|les processus|les résultats)\b/gi,
+    issue: "Formulation impersonnelle sans exemple concret, contexte ni référence précise.",
+    suggestion: "Ajoutez un contexte spécifique : « Dans notre étude du laboratoire X, cette technologie a réduit le temps de traitement de 40%. »",
+  },
+
+  // ── MODULE 1 : FORMULATIONS COMMUNES (prévisibilité) ─────────────
+
+  {
+    category: "Formulations prévisibles",
+    severity: "medium",
+    points: 5,
+    regex: /\b(l'intelligence artificielle joue un rôle (important|croissant|majeur)|dans le monde actuel|à l'ère (du|de la) (numérique|intelligence artificielle)|les avancées technologiques (permettent|offrent|ouvrent))\b/gi,
+    issue: "Phrase trop prévisible et attendue, signe d'un texte généré.",
+    suggestion: "Commencez par un fait précis ou une observation spécifique plutôt qu'une généralité.",
+  },
 ];
 
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
@@ -698,9 +800,267 @@ const detectStaccato = (sentences: string[]): number => {
   return hits;
 };
 
+// ── MODULE 3 : Dictionnaire AI_PHRASES (Module 5 étendu) ────────────
+
+/** Phrases génériques typiques de l'IA, avec poids de risque. */
+export const AI_PHRASES: Array<{ phrase: string; weight: number }> = [
+  // Fort risque
+  { phrase: "en outre", weight: 3 },
+  { phrase: "de plus", weight: 2 },
+  { phrase: "par ailleurs", weight: 3 },
+  { phrase: "en conclusion", weight: 3 },
+  { phrase: "il convient de noter", weight: 3 },
+  { phrase: "cette approche permet", weight: 3 },
+  { phrase: "approche innovante", weight: 3 },
+  { phrase: "solution pertinente", weight: 3 },
+  { phrase: "enjeux majeurs", weight: 3 },
+  { phrase: "impact significatif", weight: 3 },
+  { phrase: "contexte en constante évolution", weight: 3 },
+  { phrase: "perspectives prometteuses", weight: 3 },
+  // Moyen risque
+  { phrase: "il est important de", weight: 2 },
+  { phrase: "il est essentiel de", weight: 2 },
+  { phrase: "dans le monde actuel", weight: 2 },
+  { phrase: "à l'ère du", weight: 2 },
+  { phrase: "force est de constater", weight: 2 },
+  { phrase: "pour conclure", weight: 2 },
+  { phrase: "avancée majeure", weight: 2 },
+  { phrase: "potentiel considérable", weight: 2 },
+  { phrase: "défis majeurs", weight: 2 },
+  { phrase: "progrès significatifs", weight: 2 },
+  { phrase: "in today's world", weight: 2 },
+  { phrase: "it is important to", weight: 2 },
+  { phrase: "plays a crucial role", weight: 2 },
+  { phrase: "delve into", weight: 3 },
+  { phrase: "a testament to", weight: 2 },
+  { phrase: "in conclusion", weight: 3 },
+  { phrase: "however", weight: 1 },
+  { phrase: "moreover", weight: 1 },
+  { phrase: "furthermore", weight: 1 },
+  { phrase: "therefore", weight: 1 },
+  { phrase: "consequently", weight: 1 },
+];
+
+// ── MODULE 4 : Connecteurs pondérés ─────────────────────────────────
+
+/** Connecteurs logiques avec poids de risque IA. */
+export const WEIGHTED_CONNECTORS: Array<{ connector: string; weight: number }> = [
+  // Fort risque
+  { connector: "en outre", weight: 3 },
+  { connector: "il convient de noter que", weight: 3 },
+  { connector: "cette approche permet de", weight: 3 },
+  { connector: "il est important de souligner", weight: 2 },
+  { connector: "par conséquent", weight: 2 },
+  // Risque moyen
+  { connector: "en effet", weight: 1 },
+  { connector: "cependant", weight: 1 },
+  { connector: "de plus", weight: 2 },
+  { connector: "par ailleurs", weight: 2 },
+  { connector: "néanmoins", weight: 1 },
+  { connector: "toutefois", weight: 1 },
+  { connector: "de surcroît", weight: 2 },
+  { connector: "en conclusion", weight: 3 },
+  // EN
+  { connector: "however", weight: 1 },
+  { connector: "moreover", weight: 1 },
+  { connector: "furthermore", weight: 1 },
+  { connector: "therefore", weight: 1 },
+  { connector: "consequently", weight: 1 },
+  { connector: "in conclusion", weight: 3 },
+];
+
+// ── MODULE 6 : Répétition sémantique (n-gram overlap proxy) ────────
+
+/**
+ * Détecte la répétition sémantique entre phrases consécutives.
+ * Utilise le chevauchement de bigrammes comme proxy local (pas d'embeddings).
+ * Retourne un ratio 0-1 et les paires suspectes.
+ */
+function detectSemanticRepetition(sentences: string[]): { ratio: number; pairs: number } {
+  if (sentences.length < 2) return { ratio: 0, pairs: 0 };
+  const WORD_RE = /\b[\wàâäéèêëîïôöùûüç]+\b/gi;
+  let suspiciousPairs = 0;
+
+  for (let i = 1; i < sentences.length; i++) {
+    const a = (sentences[i - 1].toLowerCase().match(WORD_RE) || []);
+    const b = (sentences[i].toLowerCase().match(WORD_RE) || []);
+    if (a.length < 3 || b.length < 3) continue;
+
+    const bigramsA = new Set<string>();
+    const bigramsB = new Set<string>();
+    for (let j = 0; j < a.length - 1; j++) bigramsA.add(`${a[j]}|${a[j + 1]}`);
+    for (let j = 0; j < b.length - 1; j++) bigramsB.add(`${b[j]}|${b[j + 1]}`);
+
+    const intersection = [...bigramsA].filter((bg) => bigramsB.has(bg)).length;
+    const union = new Set([...bigramsA, ...bigramsB]).size;
+    const similarity = union > 0 ? intersection / union : 0;
+
+    // Seuil : si deux phrases consécutives partagent >40% de bigrammes
+    if (similarity > 0.4) suspiciousPairs++;
+  }
+
+  return { ratio: sentences.length > 1 ? suspiciousPairs / (sentences.length - 1) : 0, pairs: suspiciousPairs };
+}
+
+// ── MODULE 7 : Score de personnalisation ────────────────────────────
+
+/**
+ * Mesure la présence de marques de personnalisation :
+ * exemples précis, contexte, expérience, références concrètes.
+ */
+function computePersonalizationScore(text: string, sentences: string[]): number {
+  const markers = [
+    // Références concrètes (noms propres, lieux, organisations)
+    /(?<=\s)[A-ZÀ-Ý][a-zà-ÿ]{2,}/g,
+    // Chiffres et pourcentages
+    /\d+(?:\s*%|\s*(?:euros|dollars|€|\$|ans|mois|jours|heures|personnes|étudiants|employés|utilisateurs))/gi,
+    // Marques d'expérience personnelle
+    /\b(nous avons|j'ai|notre (équipe|équipe|étude|analyse|laboratoire|expérience|recherche)|dans (notre|mon|ma) (cas|étude|analyse|expérience|travail))\b/gi,
+    // Exemples introduits par « par exemple », « comme »
+    /\b(par exemple|tel que|notamment|parmi (lesquel|lesquell)les?|comme (le|la|l'|les))\b/gi,
+    // Citations ou références
+    /(?:selon|d'après|comme le (dit|montre|souligne))\s+[\wÀ-Ý]/gi,
+  ];
+
+  let totalHits = 0;
+  for (const marker of markers) {
+    totalHits += (text.match(marker) || []).length;
+  }
+
+  // Ratio : hits par phrase. Plus c'est élevé, plus c'est personnalisé.
+  const density = sentences.length > 0 ? totalHits / sentences.length : 0;
+  // Score inversé : peu de personnalisation = score IA élevé
+  return clamp(100 - density * 25);
+}
+
+// ── MODULE 8 : Score de paraphrase IA ───────────────────────────────
+
+/**
+ * Détecte les paraphrases artificielles :
+ * synonymes forcés, changements de registre inutiles,
+ * phrases plus complexes sans gain d'information.
+ */
+function computeParaphraseScore(text: string, sentences: string[]): number {
+  if (sentences.length === 0) return 0;
+
+  // Signaux de paraphrase IA
+  const paraphraseSignals = [
+    // Nominalisations (verbe → nom abstrait)
+    /\b(la mise en œuvre|la mise en place|la prise en charge|la mise en œuvre|la gestion de|le traitement de|l'optimisation de|l'amélioration de)\b/gi,
+    // Verbes faibles + compléments abstraits
+    /\b(contribuer à|permettre de|viser à|tendre à|avoir pour (but|objectif|vocation))\s+(l'|la|le|les|une|un|d'|des)\b/gi,
+    // Formules de reformulation
+    /\b(autrement dit|en d'autres termes|c'est-à-dire|en d'autres mots|pour le dire autrement)\b/gi,
+    // Complexité artificielle : phrases très longues avec peu de contenu concret
+  ];
+
+  let signalCount = 0;
+  for (const sig of paraphraseSignals) {
+    signalCount += (text.match(sig) || []).length;
+  }
+
+  // Ratio par phrase
+  const density = signalCount / sentences.length;
+  return clamp(density * 250);
+}
+
+// ── MODULE 3 : Score de structure IA ────────────────────────────────
+
+/**
+ * Détecte les structures trop parfaites :
+ * - Plans rigides (premièrement, deuxièmement...)
+ * - Symétrie excessive des paragraphes
+ * - Transitions artificielles systématiques
+ */
+function computeStructureScore(text: string, sentences: string[]): number {
+  let structPoints = 0;
+
+  // 1. Énumération ordonnée
+  const enumerations = text.match(/\b(premièr(?:ement|ement)|deuxièmement|troisièmement|ensuite|enfin)\b/gi) || [];
+  structPoints += enumerations.length * 8;
+
+  // 2. Symétrie des paragraphes : variance des longueurs de paragraphes
+  const paragraphs = text.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
+  if (paragraphs.length >= 3) {
+    const paraLengths = paragraphs.map((p) => p.trim().split(/\s+/).length);
+    const avgPara = paraLengths.reduce((a, b) => a + b, 0) / paraLengths.length;
+    const paraVariance = paraLengths.reduce((a, b) => a + Math.pow(b - avgPara, 2), 0) / paraLengths.length;
+    const paraCV = avgPara > 0 ? Math.sqrt(paraVariance) / avgPara : 0;
+    // Coefficient de variation faible = symétrie excessive
+    if (paraCV < 0.2) structPoints += 15;
+    else if (paraCV < 0.3) structPoints += 8;
+  }
+
+  // 3. Headers génériques (Introduction, Développement, Conclusion)
+  const genericHeaders = text.match(/^##\s*(Introduction|Points clés|Avantages|Inconvénients|Défis|Conclusion|Développement|Résumé|Summary|Conclusion)$/gim) || [];
+  structPoints += genericHeaders.length * 8;
+
+  // 4. Connecteurs en début de phrase (transitions systématiques)
+  const sentencesWithConnector = sentences.filter((s) =>
+    /^\s*(en effet|cependant|de plus|par ailleurs|en outre|par conséquent|néanmoins|toutefois|however|moreover|furthermore|therefore|firstly|secondly|finally|ensuite)/i.test(s.trim())
+  ).length;
+  const connectorStartRatio = sentences.length > 0 ? sentencesWithConnector / sentences.length : 0;
+  if (connectorStartRatio > 0.4) structPoints += 12;
+  else if (connectorStartRatio > 0.25) structPoints += 6;
+
+  return clamp(structPoints);
+}
+
+// ── MODULE 9 : Style Fingerprint ────────────────────────────────────
+
+/**
+ * Crée une empreinte de style multidimensionnelle.
+ * Permet de comparer le style du texte analysé à des profils humains vs LLM.
+ */
+function computeStyleFingerprint(
+  text: string,
+  sentences: string[],
+  words: string[],
+  transitionDensity: number,
+): StyleFingerprint {
+  const wc = words.length;
+  const sc = sentences.length;
+
+  // sentenceLength : longueur moyenne des phrases
+  const avgSentLen = sc > 0 ? words.length / sc : 0;
+
+  // vocabularyDensity : TTR (type-token ratio)
+  const uniqueWords = new Set(words.map((w) => w.toLowerCase()));
+  const ttr = wc > 0 ? uniqueWords.size / wc : 0;
+
+  // connectorRate : densité de connecteurs
+  const connectorRate = transitionDensity;
+
+  // repetitionRate : ratio de mots hapax (qui n'apparaissent qu'une fois)
+  const freq = new Map<string, number>();
+  words.forEach((w) => {
+    const lw = w.toLowerCase();
+    freq.set(lw, (freq.get(lw) || 0) + 1);
+  });
+  const hapaxCount = [...freq.values()].filter((v) => v === 1).length;
+  const repetitionRate = wc > 0 ? 1 - hapaxCount / wc : 0;
+
+  // complexity : longueur moyenne des mots
+  const avgWordLen = wc > 0 ? words.reduce((s, w) => s + w.length, 0) / wc : 0;
+
+  // personalMarkers : présence de marques personnelles (je, nous, notre, mon, ma)
+  const personalPronouns = (text.match(/\b(je|nous|notre|nos|mon|ma|mes|moi)\b/gi) || []).length;
+  const personalMarkers = sc > 0 ? personalPronouns / sc : 0;
+
+  return {
+    sentenceLength: Math.round(avgSentLen * 10) / 10,
+    vocabularyDensity: Math.round(ttr * 1000) / 1000,
+    connectorRate: Math.round(connectorRate * 1000) / 1000,
+    repetitionRate: Math.round(repetitionRate * 1000) / 1000,
+    complexity: Math.round(avgWordLen * 10) / 10,
+    personalMarkers: Math.round(personalMarkers * 1000) / 1000,
+  };
+}
+
 /** Analyse complète d'un texte. Pure, déterministe (hors aléatoire : aucun). */
 export function analyzeText(text: string): AIAnalysisResult {
   if (!text || text.length < MIN_ANALYSIS_LENGTH) {
+    const emptyFingerprint: StyleFingerprint = { sentenceLength: 0, vocabularyDensity: 0, connectorRate: 0, repetitionRate: 0, complexity: 0, personalMarkers: 0 };
     return {
       score: 0,
       perplexityScore: 0,
@@ -710,11 +1070,17 @@ export function analyzeText(text: string): AIAnalysisResult {
       voiceScore: 0,
       vocabularyScore: 0,
       depthScore: 0,
-      humanizationScore: 0,
+      structureScore: 0,
+      semanticRepetitionScore: 0,
+      personalizationScore: 0,
+      paraphraseScore: 0,
+      styleScore: 0,
+      humanizationScore: 100,
       sucksScore: 0,
       patternCount: 0,
       checklist: [],
       details: [],
+      styleFingerprint: emptyFingerprint,
     };
   }
 
@@ -741,20 +1107,20 @@ export function analyzeText(text: string): AIAnalysisResult {
     details.push({ category: "Vocabulaire", issue: "Diversité lexicale faible, vocabulaire répétitif", severity: "medium" });
   }
 
-  // 3. Transitions mécaniques
-  const transitions = [
-    "en effet", "cependant", "de plus", "par ailleurs", "en outre", "par conséquent",
-    "néanmoins", "toutefois", "de surcroît", "however", "moreover", "furthermore",
-    "therefore", "consequently",
-  ];
+  // 3. Transitions mécaniques — Module 4 : connecteurs pondérés (WEIGHTED_CONNECTORS)
   let transCount = 0;
+  let transWeightedCount = 0;
   const transFound: string[] = [];
-  transitions.forEach((t) => {
-    const m = text.match(new RegExp(`\\b${t}\\b`, "gi")) || [];
-    if (m.length) transFound.push(t);
-    transCount += m.length;
+  WEIGHTED_CONNECTORS.forEach(({ connector, weight }) => {
+    const m = text.match(new RegExp(connector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi")) || [];
+    if (m.length) {
+      transFound.push(connector);
+      transCount += m.length;
+      transWeightedCount += m.length * weight;
+    }
   });
-  const transitionScore = clamp((transCount / Math.max(1, words.length)) * MULTIPLIERS.transition);
+  const connectorDensity = sentences.length > 0 ? transWeightedCount / sentences.length : 0;
+  const transitionScore = clamp(connectorDensity * 150);
   if (transitionScore > 45) {
     details.push({ category: "Transitions", issue: "Connecteurs logiques trop fréquents", severity: "medium", examples: transFound.slice(0, 6) });
   }
@@ -805,6 +1171,52 @@ export function analyzeText(text: string): AIAnalysisResult {
     details.push({ category: "Profondeur", issue: "Peu de détails concrets (chiffres, noms, exemples)", severity: "low" });
   }
 
+  // ── NOUVEAUX MODULES AWPA ──────────────────────────────────────
+
+  // Module 3 : Score de structure IA (STRUCTURE_AI_SCORE)
+  const structureScore = computeStructureScore(text, sentences);
+  if (structureScore > 50) {
+    details.push({ category: "Structure IA", issue: "Structure trop parfaite, symétrie excessive ou énumération rigide", severity: "high" });
+  } else if (structureScore > 25) {
+    details.push({ category: "Structure IA", issue: "Certaines marques de structure artificielle détectées", severity: "medium" });
+  }
+
+  // Module 6 : Répétition sémantique
+  const { ratio: semRepetitionRatio, pairs: semRepetitionPairs } = detectSemanticRepetition(sentences);
+  const semanticRepetitionScore = clamp(semRepetitionRatio * MULTIPLIERS.semanticRepetition);
+  if (semRepetitionPairs > 0) {
+    details.push({ category: "Répétition sémantique", issue: `${semRepetitionPairs} paire(s) de phrases consécutives avec contenu trop similaire (REPETITION_AI_PATTERN)`, severity: semRepetitionPairs > 2 ? "high" : "medium" });
+  }
+
+  // Module 7 : Personnalisation (PERSONALIZATION_SCORE)
+  const personalizationScore = computePersonalizationScore(text, sentences);
+  if (personalizationScore > 80) {
+    details.push({ category: "Personnalisation", issue: "Absence de marques de personnalisation : pas d'exemples précis, de contexte, ni de références concrètes", severity: "high" });
+  } else if (personalizationScore > 60) {
+    details.push({ category: "Personnalisation", issue: "Peu de marques de personnalisation détectées", severity: "medium" });
+  }
+
+  // Module 8 : Paraphrase IA
+  const paraphraseScore = computeParaphraseScore(text, sentences);
+  if (paraphraseScore > 50) {
+    details.push({ category: "Paraphrase IA", issue: "Reformulations artificielles détectées : synonymes forcés ou complexité sans gain d'information", severity: "high" });
+  } else if (paraphraseScore > 25) {
+    details.push({ category: "Paraphrase IA", issue: "Quelques signaux de paraphrase artificielle", severity: "low" });
+  }
+
+  // Module 9 : Style Fingerprint + Style Score
+  const transDensity = words.length > 0 ? transCount / words.length : 0;
+  const styleFingerprint = computeStyleFingerprint(text, sentences, words, transDensity);
+
+  // Style score : compare le fingerprint à un profil LLM typique
+  // LLM : sentenceLength ~20, vocabularyDensity ~0.5-0.6, connectorRate élevé, repetitionRate faible, personalMarkers ~0
+  const styleScore = clamp(
+    (styleFingerprint.sentenceLength > 15 && styleFingerprint.sentenceLength < 30 ? 30 : 0) +
+    (styleFingerprint.connectorRate > 0.01 ? 25 : 0) +
+    (styleFingerprint.personalMarkers < 0.05 ? 25 : 0) +
+    (styleFingerprint.vocabularyDensity < 0.65 ? 20 : 0)
+  );
+
   // 8. Anti-AI Writing Engine : motifs explicites + suggestions de réécriture
   let patternCount = 0;
   let patternPoints = 0;
@@ -839,16 +1251,23 @@ export function analyzeText(text: string): AIAnalysisResult {
   }
 
   const W = SCORE_WEIGHTS;
-  const score = clamp(
+  // AI_SCORE = moyenne multi-signaux conformément au module AWPA
+  // (Perplexity + Burstiness + Style + Structure + Lexical + Semantic) / N
+  const weightedSubScores =
     burstinessScore * W.burstiness +
-      transitionScore * W.transition +
-      perfectionScore * W.perfection +
-      voiceScore * W.voice +
-      perplexityScore * W.perplexity +
-      vocabularyScore * W.vocabulary +
-      depthScore * W.depth +
-      Math.min(W.maxPatternPoints, patternPoints)
-  );
+    transitionScore * W.transition +
+    perfectionScore * W.perfection +
+    voiceScore * W.voice +
+    perplexityScore * W.perplexity +
+    vocabularyScore * W.vocabulary +
+    depthScore * W.depth +
+    structureScore * W.structure +
+    semanticRepetitionScore * W.semanticRepetition +
+    personalizationScore * W.personalization +
+    paraphraseScore * W.paraphrase +
+    styleScore * W.style;
+
+  const score = clamp(weightedSubScores + Math.min(W.maxPatternPoints, patternPoints));
 
   const humanizationScore = clamp(100 - score);
 
@@ -868,6 +1287,9 @@ export function analyzeText(text: string): AIAnalysisResult {
     { label: "Pas de phrases rhétoriques interdites", passed: !patternHits["Phrases rhétoriques interdites"] },
     { label: "Score SUCKS > 70", passed: sucksScore > 70 },
     { label: "Variété de longueur des phrases", passed: burstinessScore < 70 },
+    { label: "Pas de répétition sémantique", passed: semanticRepetitionScore < 30 },
+    { label: "Personnalisation présente", passed: personalizationScore < 70 },
+    { label: "Structure naturelle", passed: structureScore < 40 },
   ];
 
   return {
@@ -879,10 +1301,16 @@ export function analyzeText(text: string): AIAnalysisResult {
     voiceScore,
     vocabularyScore,
     depthScore,
+    structureScore,
+    semanticRepetitionScore,
+    personalizationScore,
+    paraphraseScore,
+    styleScore,
     humanizationScore,
     sucksScore,
     patternCount,
     checklist,
     details,
+    styleFingerprint,
   };
 }

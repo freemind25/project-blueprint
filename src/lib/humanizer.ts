@@ -833,6 +833,207 @@ const RULES: Rule[] = [
     to: ["represent", "show", "express", "demonstrate"],
     minIntensity: "light",
   },
+
+  // ── MODULE 5 : PHRASES GÉNÉRIQUES (AI_PHRASES) ─────────────────
+
+  {
+    type: "generic-phrase",
+    reason: "Remplacement d'une phrase générique IA (#5)",
+    regex: /\bapproche innovante\b/gi,
+    to: ["approche nouvelle", "nouvelle méthode", "façon de faire"],
+    minIntensity: "light",
+  },
+  {
+    type: "generic-phrase",
+    reason: "Remplacement d'une phrase générique IA (#5)",
+    regex: /\bsolution pertinente\b/gi,
+    to: ["bonne solution", "réponse adaptée", "solution efficace"],
+    minIntensity: "light",
+  },
+  {
+    type: "generic-phrase",
+    reason: "Remplacement d'une phrase générique IA (#5)",
+    regex: /\benjeux majeurs\b/gi,
+    to: ["défis importants", "problèmes clés", "enjeux centraux"],
+    minIntensity: "light",
+  },
+  {
+    type: "generic-phrase",
+    reason: "Remplacement d'une phrase générique IA (#5)",
+    regex: /\bimpact significatif\b/gi,
+    to: ["impact réel", "effet concret", "changements notables"],
+    minIntensity: "light",
+  },
+  {
+    type: "generic-phrase",
+    reason: "Remplacement d'une phrase générique IA (#5)",
+    regex: /\bcontexte en constante évolution\b/gi,
+    to: ["contexte actuel", "environnement changeant", "situation d'aujourd'hui"],
+    minIntensity: "light",
+  },
+  {
+    type: "generic-phrase",
+    reason: "Remplacement d'une phrase générique IA (#5)",
+    regex: /\bperspectives prometteuses\b/gi,
+    to: ["bonnes perspectives", "résultats encourageants", "avenir positif"],
+    minIntensity: "light",
+  },
+  {
+    type: "generic-phrase",
+    reason: "Remplacement d'une phrase générique IA (#5)",
+    regex: /\bavancée majeure\b/gi,
+    to: ["progrès notable", "avancée réelle", "amélioration importante"],
+    minIntensity: "light",
+  },
+  {
+    type: "generic-phrase",
+    reason: "Remplacement d'une phrase générique IA (#5)",
+    regex: /\bpotentiel considérable\b/gi,
+    to: ["potentiel important", "fort potentiel", "capacité réelle"],
+    minIntensity: "light",
+  },
+  {
+    type: "generic-phrase",
+    reason: "Suppression « Cette solution représente une avancée majeure » (#5)",
+    regex: /\b(cette|cet|ce)\s+(solution|approche|méthode|technologie)\s+représente (une )?avancée (majeure|importante|significative)\b/gi,
+    to: (m) => {
+      const subj = m.match(/(cette|cet|ce)\s+(\w+)/i)?.[0] || "Ce";
+      return `${subj} apporte surtout une amélioration sur`;
+    },
+    minIntensity: "moderate",
+  },
+
+  // ── MODULE 8 : PARAPHRASE IA — simplification ──────────────────
+
+  {
+    type: "paraphrase-simplify",
+    reason: "Simplification d'une nominalisation artificielle (#8)",
+    regex: /\bcontribue(?:nt)? à optimiser\b/gi,
+    to: ["améliore", "permet d'améliorer", "aide à améliorer"],
+    minIntensity: "light",
+  },
+  {
+    type: "paraphrase-simplify",
+    reason: "Simplification d'une nominalisation artificielle (#8)",
+    regex: /\bpermet(?:tent)? d'améliorer\b/gi,
+    to: ["améliore", "simplifie", "rend meilleur"],
+    minIntensity: "light",
+  },
+  {
+    type: "paraphrase-simplify",
+    reason: "Simplification d'une nominalisation artificielle (#8)",
+    regex: /\bvise(?:nt)? à renforcer\b/gi,
+    to: ["renforce", "consolide", "soutient"],
+    minIntensity: "light",
+  },
+  {
+    type: "paraphrase-simplify",
+    reason: "Simplification d'une nominalisation artificielle (#8)",
+    regex: /\bfacilite(?:nt)? la mise en œuvre\b/gi,
+    to: ["facilite l'application", "simplifie la mise en place", "rend l'application plus simple"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "paraphrase-simplify",
+    reason: "Simplification d'une nominalisation artificielle (#8)",
+    regex: /\bla mise en (œuvre|place) de\b/gi,
+    to: ["l'application de", "le déploiement de", "installer"],
+    minIntensity: "moderate",
+  },
+  {
+    type: "paraphrase-simplify",
+    reason: "Simplification d'un verbe faible + complément abstrait (#8)",
+    regex: /\bcontribuer à l'amélioration de\b/gi,
+    to: ["améliorer", "faire progresser"],
+    minIntensity: "light",
+  },
+  {
+    type: "paraphrase-simplify",
+    reason: "Simplification d'un verbe faible + complément abstrait (#8)",
+    regex: /\bavoir pour (but|objectif) de\b/gi,
+    to: ["vise à", "cherche à", "doit"],
+    minIntensity: "light",
+  },
+  {
+    type: "paraphrase-simplify",
+    reason: "Suppression d'une formule de reformulation inutile (#8)",
+    regex: /\bautrement dit,\s*/gi,
+    to: "",
+    minIntensity: "moderate",
+  },
+  {
+    type: "paraphrase-simplify",
+    reason: "Suppression d'une formule de reformulation inutile (#8)",
+    regex: /\ben d'autres termes,\s*/gi,
+    to: "",
+    minIntensity: "moderate",
+  },
+
+  // ── MODULE 3 : VARIATION STRUCTURELLE ──────────────────────────
+
+  {
+    type: "structure-enum",
+    reason: "Remplacement d'un marqueur d'énumération rigide (#3)",
+    regex: /\bPremièr(?:ement|ement),?\s*/gi,
+    to: ["Pour commencer, ", "D'abord, ", "Tout d'abord, "],
+    minIntensity: "light",
+    modes: ["naturel", "personnel"],
+  },
+  {
+    type: "structure-enum",
+    reason: "Remplacement d'un marqueur d'énumération rigide (#3)",
+    regex: /\bDeuxièmement,?\s*/gi,
+    to: ["Ensuite, ", "De plus, ", "Par ailleurs, "],
+    minIntensity: "light",
+    modes: ["naturel", "personnel"],
+  },
+  {
+    type: "structure-enum",
+    reason: "Remplacement d'un marqueur d'énumération rigide (#3)",
+    regex: /\bTroisièmement,?\s*/gi,
+    to: ["Et puis, ", "Enfin, ", "Autre chose : "],
+    minIntensity: "light",
+    modes: ["naturel", "personnel"],
+  },
+  {
+    type: "structure-connector",
+    reason: "Remplacement d'un connecteur à fort risque (#4)",
+    regex: /\bEn outre,?\s*/gi,
+    to: ["Aussi, ", "En plus, ", "Par ailleurs, "],
+    minIntensity: "light",
+    modes: ["naturel", "personnel"],
+  },
+  {
+    type: "structure-connector",
+    reason: "Suppression d'un connecteur à fort risque (#4)",
+    regex: /\bIl convient de noter que\s*/gi,
+    to: "",
+    minIntensity: "light",
+    modes: ["professionnel", "expert", "academique"],
+  },
+
+  // ── MODULE 7 : AJOUT DE CONTEXTE (humanization) ────────────────
+
+  {
+    type: "personalization-context",
+    reason: "Ajout de contexte concret pour impersonnalisation (#7)",
+    regex: /\b(Cette technologie|Cette méthode|Ces outils|Ces résultats)\s+(améliore|transforme|permet d'améliorer|aide)\s+(les entreprises|les organisations|les processus|les résultats)\b/gi,
+    to: (m) => {
+      const subj = m.match(/(Cette technologie|Cette méthode|Ces outils|Ces résultats)/i)?.[1] || "Cette méthode";
+      const verb = m.match(/(améliore|transforme|permet d'améliorer|aide)/i)?.[1] || "améliore";
+      const obj = m.match(/(les entreprises|les organisations|les processus|les résultats)/i)?.[1] || "les résultats";
+      return `Dans ce cas précis, ${subj.toLowerCase()} ${verb} surtout ${obj}`;
+    },
+    minIntensity: "moderate",
+    modes: ["naturel", "personnel", "professionnel"],
+  },
+  {
+    type: "personalization-precision",
+    reason: "Remplacement d'une formulation vague par une version plus précise (#7)",
+    regex: /\bdes améliorations significatives\b/gi,
+    to: ["des améliorations mesurables", "des progrès concrets", "des résultats tangibles"],
+    minIntensity: "moderate",
+  },
 ];
 
 /** Un seul passage de réécriture. Retourne le texte + le journal. */

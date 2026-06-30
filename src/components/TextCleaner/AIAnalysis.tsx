@@ -17,7 +17,7 @@ interface AIAnalysisProps {
 const getScoreLabel = (score: number): { label: string; color: string; bgColor: string; icon: React.ReactNode } => {
   if (score < 30) {
     return {
-      label: "Probablement humain",
+      label: "Caractéristiques d'écriture humaine",
       color: "text-success",
       bgColor: "bg-success",
       icon: <CheckCircle className="w-5 h-5 text-success" />,
@@ -25,14 +25,14 @@ const getScoreLabel = (score: number): { label: string; color: string; bgColor: 
   }
   if (score < 60) {
     return {
-      label: "Mixte / Incertain",
+      label: "Caractéristiques mixtes",
       color: "text-warning",
       bgColor: "bg-warning",
       icon: <AlertTriangle className="w-5 h-5 text-warning" />,
     };
   }
   return {
-    label: "Probablement IA",
+    label: "Caractéristiques compatibles avec une génération IA",
     color: "text-destructive",
     bgColor: "bg-destructive",
     icon: <XCircle className="w-5 h-5 text-destructive" />,
@@ -182,6 +182,11 @@ export const AIAnalysis: React.FC<AIAnalysisProps> = ({ result, isAnalyzing, hyb
         <ScoreBar label="Perplexité" score={result.perplexityScore} icon={<Brain className="w-3 h-3" />} />
         <ScoreBar label="Vocabulaire" score={result.vocabularyScore} icon={<BookOpen className="w-3 h-3" />} />
         <ScoreBar label="Profondeur" score={result.depthScore} icon={<Layers className="w-3 h-3" />} />
+        <ScoreBar label="Structure IA" score={result.structureScore} icon={<Layers className="w-3 h-3" />} />
+        <ScoreBar label="Répét. sémantique" score={result.semanticRepetitionScore} icon={<AlertTriangle className="w-3 h-3" />} />
+        <ScoreBar label="Personnalisation" score={result.personalizationScore} icon={<CheckCircle className="w-3 h-3" />} />
+        <ScoreBar label="Paraphrase IA" score={result.paraphraseScore} icon={<Bot className="w-3 h-3" />} />
+        <ScoreBar label="Style" score={result.styleScore} icon={<Sparkles className="w-3 h-3" />} />
       </div>
 
       {/* Humanization & SUCKS overview */}
