@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type{MLPrediction,ModelInfo,ModelState,ModelSource}from"./types";
 import{extractFeatures,FEATURE_DIM}from"./featureExtractor";
 import{builtinPredict}from"./builtinModel";
@@ -9,7 +10,7 @@ export async function initModelService():Promise<ModelInfo>{
   initP=tryOnnx().then(()=>{if(currentState!=="onnx-ready"){currentState="ready";currentInfo={source:"builtin",name:"UnRobot Neural v1.0",version:"1.0.0",size:"~2 KB",inputShape:[1,FEATURE_DIM]};}}).catch(()=>{currentState="ready";currentInfo={source:"builtin",name:"UnRobot Neural v1.0",version:"1.0.0",size:"~2 KB",inputShape:[1,FEATURE_DIM]};});
   await initP;return currentInfo!;
 }
-async function tryOnnx(){try{const ort=await import("onnxruntime-web");ort.env.wasm.wasmPaths="/wasm/";const r=await fetch("/models/ai-detector.onnx",{method:"HEAD"});if(!r.ok)return;onnxSession=await ort.InferenceSession.create("/models/ai-detector.onnx",{executionProviders:["wasm"],graphOptimizationLevel:"all"});currentState="onnx-ready";currentInfo={source:"onnx",name:"RoBERTa AI Detector",version:"1.0.0",size:"5-10 MB (ONNX INT8)",inputShape:[1,FEATURE_DIM]};}catch{}}
+async function tryOnnx(){try{const ort=await import("onnxruntime-web");ort.env.wasm.wasmPaths="/wasm/";const r=await fetch("/models/ai-detector.onnx",{method:"HEAD"});if(!r.ok)return;onnxSession=await ort.InferenceSession.create("/models/ai-detector.onnx",{executionProviders:["wasm"],graphOptimizationLevel:"all"});currentState="onnx-ready";currentInfo={source:"onnx",name:"RoBERTa AI Detector",version:"1.0.0",size:"5-10 MB (ONNX INT8)",inputShape:[1,FEATURE_DIM]};}catch{ /* ONNX not available */ }}
 function sig(x:number){return 1/(1+Math.exp(-Math.max(-500,Math.min(500,x))));}
 export async function runInference(text:string,heuristicScores:number[],customPredict?:(f:Float32Array)=>number):Promise<MLPrediction>{
   if(currentState==="idle")await initModelService();

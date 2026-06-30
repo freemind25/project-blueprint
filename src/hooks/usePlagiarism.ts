@@ -6,7 +6,7 @@ const CORPUS_KEY = "unrobot:plagiarism-corpus";
 function loadCorpus(): ReferenceDocument[] {
   try { const s = localStorage.getItem(CORPUS_KEY); if (!s) return []; return (JSON.parse(s) as Array<Record<string, unknown>>).map(d => ({ ...d, signature: new Uint32Array(d.signature as number[]) })); } catch { return []; }
 }
-function saveCorpus(docs: ReferenceDocument[]) { try { localStorage.setItem(CORPUS_KEY, JSON.stringify(docs)); } catch {} }
+function saveCorpus(docs: ReferenceDocument[]) { try { localStorage.setItem(CORPUS_KEY, JSON.stringify(docs)); } catch { /* storage full */ } }
 
 export const usePlagiarism = () => {
   const [references, setReferences] = useState<ReferenceDocument[]>(() => { const s = loadCorpus(); s.forEach(d => addReference(d.text, d.name)); return s; });
@@ -20,7 +20,7 @@ export const usePlagiarism = () => {
     setIsChecking(true);
     const result = analyzePlagiarism(text, config);
     setLastResult(result); setIsChecking(false);
-    result.overallScore > 0 ? toast.warning(`Similarité : ${result.overallScore}%`) : toast.success("Aucune similarité détectée.");
+    if (result.overallScore > 0) { toast.warning(`Similarité : ${result.overallScore}%`); } else { toast.success("Aucune similarité détectée."); }
     return result;
   }, []);
 

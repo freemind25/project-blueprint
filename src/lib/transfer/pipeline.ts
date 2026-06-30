@@ -171,7 +171,7 @@ function trainEpoch(
         const nextLayer = layers[l + 1];
         layerDeltas = [];
         for (let i = 0; i < layer.w.length; i++) {
-          let sum = 0;
+          const sum = 0;
           // We need the next layer's deltas, which we already computed in backprop
           // But we need to store them. Let's refactor.
           layerDeltas.push(0); // placeholder
