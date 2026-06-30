@@ -78,7 +78,251 @@ const SUCKS_CONFIG = {
 } as const;
 
 // Anti-AI Writing Engine : motifs textuels typiques de l'IA (FR + EN), 100% local.
+// Basé sur le guide Wikipedia « Signs of AI writing » + extensions locales.
 export const AI_PATTERNS: PatternDef[] = [
+  // ── MOTIFS DE CONTENU ──────────────────────────────────────────────
+
+  // #1 Emphase indue sur l'importance
+  {
+    category: "Emphase artificielle",
+    severity: "high",
+    points: 8,
+    regex: /\b(constitue un témoignage|joue un rôle (vital|significatif|cruciel|déterminant)|met en lumière son importance|reflète une tendance plus large|ouvrant la voie à|marquant un tournant|façonnant le|point central|marque indélébile|profondément ancré|contribuant à)\b/gi,
+    issue: "L'importance est gonflée artificiellement avec des formules vides.",
+    suggestion: "Énoncez les faits directement, sans affirmer leur importance.",
+  },
+
+  // #2 Emphase sur la notoriété
+  {
+    category: "Notoriété excessive",
+    severity: "medium",
+    points: 5,
+    regex: /\b(couverture (indépendante|média)|rédigé par un expert reconnu|présence active sur les réseaux| largement cité)\b/gi,
+    issue: "L'IA assomme le lecteur avec des affirmations de notoriété sans contexte.",
+    suggestion: "Citez la source, le média et la date précisément, ou supprimez.",
+  },
+
+  // #3 Analyses superficielles en « -ant »
+  {
+    category: "Gérondifs superficiels",
+    severity: "high",
+    points: 7,
+    regex: /\b(soulignant|mettant en (évidence|avant)|reflétant|symbolisant|contribuant à|cultivant|favorisant|englobant|illustrant)\s+/gi,
+    issue: "Participes présents accrochés en fin de phrase pour donner une fausse profondeur.",
+    suggestion: "Réécrivez avec un verbe conjugué ou supprimez la proposition.",
+  },
+
+  // #4 Langage promotionnel
+  {
+    category: "Langage promotionnel",
+    severity: "high",
+    points: 7,
+    regex: /\b(vibrant|au riche patrimoine|beauté naturelle|somptueux|à couper le souffle|incontournable|révolutionnaire|réputé|niché|au cœur de|illustre parfaitement)\b/gi,
+    issue: "Ton promotionnel et publicitaire incompatible avec un texte neutre ou informatif.",
+    suggestion: "Remplacez par des descriptions factuelles.",
+  },
+
+  // #5 Attributions vagues
+  {
+    category: "Attributions vagues",
+    severity: "medium",
+    points: 5,
+    regex: /\b(des (rapports sectoriels|observateurs ont relevé|experts estiment|critiques avancent|sources|publications))\b/gi,
+    issue: "Opinions attribuées à des autorités vagues sans source précise.",
+    suggestion: "Nommez l'auteur, l'étude ou le média précisément.",
+  },
+
+  // #6 Section « Défis et perspectives »
+  {
+    category: "Squelette formulaique",
+    severity: "high",
+    points: 8,
+    regex: /(?:malgré (son|sa|ces|les)\s+\w+.*(?:fait face à|rencontre|doit faire face à)\s+(?:plusieurs\s+)?défis|(?:défis et|perspectives d'avenir|malgré ces défis))/gi,
+    issue: "Section « Défis » formulaique typique des textes IA.",
+    suggestion: "Remplacez par des faits précis : quels problèmes, quelles dates, quelles réponses.",
+  },
+
+  // ── MOTIFS DE LANGUE ET GRAMMAIRE ──────────────────────────────────
+
+  // #8 Équilibre forcé
+  {
+    category: "Équilibre forcé",
+    severity: "high",
+    points: 8,
+    regex: /\bd'un côté[^.]+de l'autre côté/gi,
+    issue: "Fausse symétrie « d'un côté... de l'autre » imposée même quand unjustifiée.",
+    suggestion: "Prenez position au lieu de tout équilibrer artificiellement.",
+  },
+
+  // #9 Vocabulaire typique IA
+  {
+    category: "Vocabulaire IA",
+    severity: "high",
+    points: 6,
+    regex: /\b(par ailleurs|s'aligner sur|explorer en profondeur|durable|pérenne|renforcer|favoriser|susciter|mettre en lumière|déterminant|tapisserie|témoignage|souligner|précieux|vibrant|paysage (en constante évolution|technologique|numérique))\b/gi,
+    issue: "Mots qui apparaissent bien plus fréquemment dans les textes post-2023.",
+    suggestion: "Utilisez des synonymes courants ou reformulez.",
+  },
+
+  // #10 Vocabulaire trop soutenu
+  {
+    category: "Vocabulaire soutenu",
+    severity: "medium",
+    points: 4,
+    regex: /\b(s'avérer nécessaire|s'efforcer de|à proximité immédiate de|préalablement à|postérieurement à|procéder au commencement de)\b/gi,
+    issue: "Tournures multi-syllabiques là où un mot court dirait la même chose.",
+    suggestion: "Utilisez : falloir, essayer, près de, avant, après, démarrer.",
+  },
+
+  // #11 Évitement du verbe « être »
+  {
+    category: "Contournement de « être »",
+    severity: "medium",
+    points: 4,
+    regex: /\b(se présente comme|constitue (un|une)|représente (un|une)|offre un(e?)\s)/gi,
+    issue: "L'IA remplace « être » par des tournures élaborées.",
+    suggestion: "Utilisez simplement « est » ou « sont ».",
+  },
+
+  // #12 Parallélismes négatifs
+  {
+    category: "Parallélisme négatif",
+    severity: "high",
+    points: 9,
+    regex: /(?:il ne s'agit pas (seulement|juste) de[^.,;]+?[-–—,]\s*(c'est|il s'agit)|n'est pas (seulement|juste) un[^.,;]+?[-–—,]\s*(c'est|c'est une)|isn't just[^.,;]+?[-–—,]\s*(it's|they're))/gi,
+    issue: "Structure « Il ne s'agit pas seulement de X — c'est Y » surutilisée par l'IA.",
+    suggestion: "Affirmez l'idée directement.",
+  },
+
+  // #13 Formule du trois
+  {
+    category: "Formule du trois",
+    severity: "medium",
+    points: 5,
+    regex: /(?:\w+(?:e|ent|ons|ez),\s*\w+(?:e|ent|ons|ez)\s+et\s+\w+(?:e|ent|ons|ez)){2,}/gi,
+    issue: "Regroupements artificiels en trois pour paraître exhaustif.",
+    suggestion: "Ne listez que ce qui est nécessaire.",
+  },
+
+  // #14 Variation élégante (cycle de synonymes)
+  // (détecté via le voiceScore et la TTR, pas de regex simple)
+
+  // #15 Fausses échelles
+  {
+    category: "Fausse échelle",
+    severity: "medium",
+    points: 5,
+    regex: /de\s+.+?\s+à\s+.+?,\s*de\s+.+?\s+à\s+/gi,
+    issue: "Construction « de X à Y, de A à B » où les éléments ne forment pas une échelle cohérente.",
+    suggestion: "Énumérez directement les éléments sans forcer une progression.",
+  },
+
+  // ── MOTIFS DE STYLE ────────────────────────────────────────────────
+
+  // #16 Abus des tirets cadratins
+  {
+    category: "Tirets cadratins abusifs",
+    severity: "medium",
+    points: 3,
+    regex: /[^—\n]*—[^—\n]*—/g,
+    issue: "Plusieurs tirets cadratins dans une même phrase, imitant un style « percutant ».",
+    suggestion: "Remplacez par des virgules ou séparez en deux phrases.",
+  },
+
+  // #17 Abus du gras
+  {
+    category: "Gras abusif",
+    severity: "low",
+    points: 2,
+    regex: /\*\*[^*]+\*\*/g,
+    issue: "Mise en gras mécanique de passages entiers.",
+    suggestion: "Ne mettez en gras que les termes vraiment essentiels.",
+  },
+
+  // #19 Title Case en français
+  {
+    category: "Title Case",
+    severity: "medium",
+    points: 4,
+    regex: /##?\s+[A-ZÀÂÉÈÊÏÔÙÛÜŒ][a-zàâéèêëîïôöùûüçÿ]+(?:\s+[A-ZÀÂÉÈÊÏÔÙÛÜŒ][a-zàâéèêëîïôöùûüçÿ]+){2,}/g,
+    issue: "Tous les mots importants capitalisés (calque de l'anglais « Title Case »).",
+    suggestion: "En français, seul le premier mot et les noms propres prennent une majuscule dans les titres.",
+  },
+
+  // #20 Émojis décoratifs
+  {
+    category: "Émojis décoratifs",
+    severity: "low",
+    points: 2,
+    regex: /(?:^|\n|\s)[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]\s*\*\*/u,
+    issue: "Émojis utilisés comme puces décoratives, caractéristiques de l'IA.",
+    suggestion: "Supprimez les émojis et utilisez des puces simples.",
+  },
+
+  // #21 Squelette de document rigide
+  {
+    category: "Squelette rigide",
+    severity: "high",
+    points: 8,
+    regex: /##\s*(Introduction|Points clés|Avantages|Inconvénients|Défis|Conclusion)\b/gi,
+    issue: "Structure en sections génériques (Intro/Points clés/Avantages/Défis/Conclusion).",
+    suggestion: "Laissez le contenu dicter la structure, pas l'inverse.",
+  },
+
+  // ── MOTIFS DE COMMUNICATION ────────────────────────────────────────
+
+  // #23 Artefacts de chatbot
+  {
+    category: "Artefacts de chatbot",
+    severity: "high",
+    points: 10,
+    regex: /\b(j'?espère que (ça|cela) (vous )?aide|bien sûr !?|certainement !?|vous avez tout à fait raison|souhaitez-vous|n'?hésitez pas (à me le faire savoir|à me dire)|voici (un|une))\b/gi,
+    issue: "Phrases d'interaction chatbot collées dans le contenu final.",
+    suggestion: "Supprimez tous les artefacts de conversation avec l'IA.",
+  },
+
+  // #24 Avertissements date limite
+  {
+    category: "Avertissements temporels",
+    severity: "medium",
+    points: 4,
+    regex: /\b(à la date de|jusqu'à (ma|la )?(dernière mise à jour|mes connaissances)|les informations (spécifiques|disponibles) sont (limitées|rares)|d'?après les informations disponibles)\b/gi,
+    issue: "Avertissements de l'IA sur ses limites temporelles, collés dans le texte.",
+    suggestion: "Supprimez ou remplacez par une vérification factuelle.",
+  },
+
+  // #25 Ton servile
+  {
+    category: "Ton servile",
+    severity: "medium",
+    points: 5,
+    regex: /\b(excellente question|remarquable|point (très )?intéressant|vous avez (tout à fait )?raison (de|de dire que))\b/gi,
+    issue: "Langage excessivement positif et complaisant envers le lecteur.",
+    suggestion: "Répondez directement sans flatter.",
+  },
+
+  // #28 Conclusions positives génériques
+  {
+    category: "Conclusion générique",
+    severity: "high",
+    points: 8,
+    regex: /\b(l'?avenir s'?annonce (radieux|prometteur)|des temps passionnants nous attendent|chemin vers l'?excellence|avancée majeure dans la bonne direction|poursuit (sa|son) chemin|continu(?:e|era) de (prospérer|croître|s'?améliorer))\b/gi,
+    issue: "Fin vague et enjouée, typique des textes générés.",
+    suggestion: "Terminez par un fait concret ou une action spécifique.",
+  },
+
+  // #29 Mots composés avec trait d'union excessif
+  {
+    category: "Traits d'union abusifs",
+    severity: "low",
+    points: 3,
+    regex: /\b(multi-fonctionnel|en temps-réel|à long-terme|de bout-en-bout|bien-connu|haute-qualité|orienté-détail|axé-sur)\b/gi,
+    issue: "Traits d'union réguliers là où les humains sont inconsistants ou n'en mettent pas.",
+    suggestion: "Écrivez sans trait d'union : pluridisciplinaire, en temps réel, à long terme, etc.",
+  },
+
+  // ── MOTIFS EXISTANTS (conservés) ───────────────────────────────────
+
   {
     category: "Construction corrélative",
     severity: "high",
@@ -131,7 +375,7 @@ export const AI_PATTERNS: PatternDef[] = [
     category: "Jargon corporate",
     severity: "low",
     points: 2,
-    regex: /\b(leveraging|synergies|stakeholder|ecosystem|synergie|optimiser l'engagement)\b/gi,
+    regex: /\b(leveraging|synergies?|stakeholder|ecosystem|synergie|optimiser l'engagement)\b/gi,
     issue: "Jargon d'entreprise vide de sens concret.",
     suggestion: "Remplacez par des mots simples et concrets.",
   },
@@ -139,9 +383,27 @@ export const AI_PATTERNS: PatternDef[] = [
     category: "Langage vague",
     severity: "low",
     points: 3,
-    regex: /(many people think|various studies show|significant improvements|beaucoup de gens pensent|de nombreuses études|améliorations significatives)/gi,
+    regex: /(many people think|various studies show|significant improvements|beaucoup de gens pensent|de nombreuses études|améliorations significatives)\b/gi,
     issue: "Affirmations vagues sans chiffres ni source.",
     suggestion: "Remplacez par des données précises (chiffres, exemples, sources).",
+  },
+  // #27 Atténuation excessive
+  {
+    category: "Atténuation excessive",
+    severity: "medium",
+    points: 5,
+    regex: /\b(potentiellement\s+avancer|pourrait\s+éventuellement|il\s+est\s+possible\s+que|on\s+pourrait\s+penser\s+que)\b/gi,
+    issue: "Sur-qualification permanente des affirmations.",
+    suggestion: "Affirmez directement ou dites que vous ne savez pas.",
+  },
+  // #26 Locutions de remplissage
+  {
+    category: "Locutions de remplissage",
+    severity: "medium",
+    points: 4,
+    regex: /\b(afin d'atteindre cet objectif|à l'heure actuelle|dans l'éventualité où|il convient de noter que|il est (important|essentiel) de (souligner|noter|retenir)|au (cœur|sein) du sujet)\b/gi,
+    issue: "Locutions qui allongent les phrases sans apporter d'information.",
+    suggestion: "Supprimez ou remplacez par une formulation directe.",
   },
 ];
 
