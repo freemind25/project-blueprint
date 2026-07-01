@@ -1,5 +1,4 @@
 import React from "react";
-import logoAsset from "@/assets/logo-unrobot.png.asset.json";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Header: React.FC = () => {
@@ -10,7 +9,7 @@ export const Header: React.FC = () => {
       </div>
       <div className="inline-flex items-center gap-2 sm:gap-4 justify-center mb-4 sm:mb-6">
         <img
-          src={logoAsset.url}
+          src="/logo.png"
           alt="Logo UnRobot"
           className="h-14 sm:h-20 w-auto"
         />
