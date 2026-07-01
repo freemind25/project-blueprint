@@ -22,6 +22,11 @@ const BUILTIN_DATASETS = [
   { file: "UnRobot_Dataset_V3_AI_Advanced_100.json", label: "V3 — IA avancée", desc: "150 samples (IA only)", ai: 150, human: 0 },
   { file: "UnRobot_Dataset_V4_AntiDetection_150.json", label: "V4 — Anti-détection", desc: "245 samples (145/100)", ai: 145, human: 100 },
   { file: "UnRobot_Dataset_V5_Balanced_Final_20.json", label: "V5 — Équilibré", desc: "20 samples (10/10)", ai: 10, human: 10 },
+  { file: "UnRobot_Dataset_V6_Multilingual_FR_EN_AR_200.json", label: "V6 — Multilingue FR/EN/AR", desc: "350 samples (175/175)", ai: 175, human: 175 },
+  { file: "UnRobot_Dataset_V7_Adversarial_450.json", label: "V7 — Adversarial", desc: "390 samples (240/150)", ai: 240, human: 150 },
+  { file: "UnRobot_Dataset_V8_Professional_LongTexts_250.json", label: "V8 — Longs textes pro", desc: "275 samples (125/150)", ai: 125, human: 150 },
+  { file: "UnRobot_Dataset_V9_Style_Personality_Fingerprint_560.json", label: "V9 — Style & fingerprint", desc: "560 samples (280/280)", ai: 280, human: 280 },
+  { file: "UnRobot_Dataset_V10_Domain_Experts_300.json", label: "V10 — Experts métier", desc: "300 samples (150/150)", ai: 150, human: 150 },
 ] as const;
 
 export const TransferLearningPanel: React.FC<TransferLearningPanelProps> = ({ onModelLoaded, activeModel }) => {
