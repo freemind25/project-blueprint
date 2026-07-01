@@ -152,20 +152,36 @@ export const TransferLearningPanel: React.FC<TransferLearningPanelProps> = ({ on
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Brain className="w-5 h-5 text-primary" />
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold">Modèle personnalisé</h3>
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={() => setShowHelp(true)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setShowHelp(true); }}
-                className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold leading-none cursor-pointer select-none bg-primary text-primary-foreground hover:opacity-80 transition-opacity shrink-0"
-                aria-label="Aide Transfer Learning"
-              >
-                ?
-              </span>
+            <div>
+              <h3 className="font-semibold" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                Modèle personnalisé
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setShowHelp(true)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setShowHelp(true); }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "20px",
+                    height: "20px",
+                    borderRadius: "50%",
+                    backgroundColor: "#3b82f6",
+                    color: "#ffffff",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    lineHeight: 1,
+                    flexShrink: 0,
+                  }}
+                  aria-label="Aide Transfer Learning"
+                >
+                  ?
+                </span>
+              </h3>
+              <p className="text-xs text-muted-foreground">Transfer Learning in-browser · Pur JavaScript</p>
             </div>
-            <p className="text-xs text-muted-foreground">Transfer Learning in-browser · Pur JavaScript</p>
           </div>
           {activeModel && (
             <div className="text-right">
