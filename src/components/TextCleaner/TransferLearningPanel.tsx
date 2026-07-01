@@ -5,10 +5,11 @@ import {
   saveDatasetToIDB, loadDatasetFromIDB, listDatasetsFromIDB,
   type LabeledText, type TrainingProgress, type CustomModel, DEFAULT_TRAINING_CONFIG,
 } from "@/lib/transfer";
-import { Brain, Play, Square, Trash2, Download, Upload, Check, X, Loader2, Cpu, Save, FolderOpen } from "lucide-react";
+import { Brain, Play, Square, Trash2, Download, Upload, Check, X, Loader2, Cpu, Save, FolderOpen, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
+import { TransferLearningHelp } from "./TransferLearningHelp";
 
 interface TransferLearningPanelProps {
   onModelLoaded: (model: CustomModel | null) => void;
@@ -24,6 +25,7 @@ export const TransferLearningPanel: React.FC<TransferLearningPanelProps> = ({ on
   const [savedModels, setSavedModels] = useState<CustomModel[]>([]);
   const [epochs, setEpochs] = useState(DEFAULT_TRAINING_CONFIG.epochs);
   const [showModels, setShowModels] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const refreshModels = useCallback(async () => {
     const models = await loadModelsFromIDB();
@@ -109,6 +111,7 @@ export const TransferLearningPanel: React.FC<TransferLearningPanelProps> = ({ on
   const humanCount = samples.filter((s) => s.label === "human").length;
 
   return (
+    <>
     <div className="space-y-4 animate-fade-in" role="region" aria-label="Transfer Learning">
       {/* En-tête */}
       <div className="p-6 rounded-lg border border-border bg-card/80">
@@ -119,6 +122,15 @@ export const TransferLearningPanel: React.FC<TransferLearningPanelProps> = ({ on
               <h3 className="font-semibold">Modèle personnalisé</h3>
               <p className="text-xs text-muted-foreground">Transfer Learning in-browser · Pur JavaScript</p>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowHelp(true)}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              aria-label="Aide"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
           </div>
           {activeModel && (
             <div className="text-right">
@@ -280,6 +292,8 @@ export const TransferLearningPanel: React.FC<TransferLearningPanelProps> = ({ on
         </div>
       )}
     </div>
+      <TransferLearningHelp open={showHelp} onOpenChange={setShowHelp} />
+    </>
   );
 };
 
